@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { JOURNALS } from '../data/journals';
+import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS } from '../data/journals';
 import { getSettings, saveSettings } from '../lib/settings';
 
 export default function SettingsPage() {
@@ -52,18 +52,29 @@ export default function SettingsPage() {
       </form>
       <section className="panel">
         <h2>Journals ({JOURNALS.length})</h2>
-        <ul className="journal-list">
-          {JOURNALS.map((j) => (
-            <li key={j.id}>
-              <span>{j.name}</span>
-              <span className="muted">
-                {j.region} · {j.issns.join(', ')}
-                {j.source === 'crossref' && ' · via Crossref'}
-                {j.broad && ' · OMFS-filtered'}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {ACCESS_TIERS.map(({ tier, label }) => {
+          const group = JOURNALS.filter((j) => accessTier(j) === tier).sort(byFreeAccess);
+          return (
+            <div key={tier}>
+              <h3 className="journal-group">
+                {label} ({group.length})
+              </h3>
+              <ul className="journal-list">
+                {group.map((j) => (
+                  <li key={j.id}>
+                    <span>{j.name}</span>
+                    <span className="muted">
+                      {j.freePct}% free · {j.region} · {j.issns.join(', ')}
+                      {j.source === 'crossref' && ' · via Crossref'}
+                      {j.broad && ' · OMFS-filtered'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+        <p className="muted">% free = share of 2025 articles free to read, measured October 2026.</p>
       </section>
     </>
   );

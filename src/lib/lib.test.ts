@@ -123,3 +123,22 @@ describe('crossref junk filter', () => {
     expect(JUNK_TITLE.test('Coverage of flaps')).toBe(false);
   });
 });
+
+describe('free access', () => {
+  it('adds the PubMed free full text filter when freeOnly', () => {
+    expect(buildPubmedTerm([journalById('joms')!], { page: 0, freeOnly: true })).toMatch(/AND free full text\[sb\]$/);
+    expect(buildPubmedTerm([journalById('joms')!], { page: 0 })).not.toContain('free full text');
+  });
+
+  it('tiers journals by free share and lists free journals first', async () => {
+    const { accessTier, byFreeAccess } = await import('../data/journals');
+    expect(accessTier(journalById('bmcoh')!)).toBe('free');
+    expect(accessTier(journalById('jmos')!)).toBe('mixed');
+    expect(accessTier(journalById('joms')!)).toBe('subscription');
+    expect([...JOURNALS].sort(byFreeAccess)[0].freePct).toBe(100);
+  });
+
+  it('marks every article in a fully free journal as free', () => {
+    expect(parsePubmedXml(xml)[0].isOpenAccess).toBe(true); // Head & Face Medicine
+  });
+});

@@ -5,6 +5,10 @@ import { getSettings } from './settings';
 import type { Article, ArticleQuery, Journal } from './types';
 
 const API = 'https://api.crossref.org';
+const CC_LICENSES = ['by', 'by-nc', 'by-nc-nd', 'by-nd', 'by-sa', 'by-nc-sa'].flatMap((v) =>
+  ['http', 'https'].map((proto) => `${proto}://creativecommons.org/licenses/${v}/4.0/`),
+);
+
 /** Front matter and notices Crossref registers as articles. */
 export const JUNK_TITLE = /^(editorial board|ed board|issue information|table of contents|toc|future issues|contents|masthead|cover|.*newsletter|corrigendum|erratum|retraction|correction to)\b|---/i;
 
@@ -31,7 +35,7 @@ export function mapCrossrefWork(w: CrossrefWork, journal: Journal): Article {
   const pubDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const title = stripTags(w.title?.[0] ?? '(untitled)');
   const abstract = stripTags(w.abstract ?? '').replace(/^Abstract\s*/i, '');
-  const isOpenAccess = !!journal.openAccess || (w.license ?? []).some((l) => /creativecommons\.org/i.test(l.URL));
+  const isOpenAccess = journal.freePct >= 95 || (w.license ?? []).some((l) => /creativecommons\.org/i.test(l.URL));
   const pdf = w.link?.find((l) => l['content-type'] === 'application/pdf')?.URL;
   return {
     id: `doi:${w.DOI.toLowerCase()}`,
@@ -74,6 +78,8 @@ export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows:
     'type:journal-article',
     `from-pub-date:${q.yearFrom ?? 1900}`,
     `until-pub-date:${q.yearTo ?? 3000}`,
+    // Free only: Creative Commons licences (repeated license.url filters are OR-ed).
+    ...(q.freeOnly ? CC_LICENSES.map((l) => `license.url:${l}`) : []),
   ];
   const p = new URLSearchParams({
     filter: filters.join(','),
@@ -100,6 +106,7 @@ export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows:
     const topic = q.topic ? topicById(q.topic) : undefined;
     // Crossref has no subject index for these titles: filter topic locally (best effort per page).
     if (topic) articles = articles.filter((a) => a.topics.includes(topic.label));
+    if (q.freeOnly) articles = articles.filter((a) => a.isOpenAccess);
     return { articles, total: (json.message['total-results'] as number) ?? 0, errors: [] as string[] };
   } catch (e) {
     return { articles: [] as Article[], total: 0, errors: [`Crossref: ${(e as Error).message}`] };

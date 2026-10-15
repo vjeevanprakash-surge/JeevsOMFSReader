@@ -15,10 +15,19 @@ PDF proxy: `GET /pdf/PMCxxxx` lists `PMCxxxx.` versions in the bucket, streams t
 middleware and as a Cloudflare Worker (`proxy/`). If no proxy URL is configured, the PDF opens in a new tab.
 
 ## Journal registry (`src/data/journals.ts`)
-Each entry: `name, abbr, region, issns[], source ('pubmed' | 'crossref'), broad?, openAccess?`.
-ISSNs verified against the NLM catalog and live PubMed counts on 2026-10-15. `openAccess` = listed in DOAJ
-(CMTR, PRS Global Open, Oral Oncol Rep, Head Face Med, Int J Implant Dent, J Oral Biol Craniofac Res,
-Indian J Plast Surg, Maxillofac Plast Reconstr Surg); other articles are free when Europe PMC says so.
+Each entry: `name, abbr, region, issns[], source ('pubmed' | 'crossref'), broad?, freePct`.
+ISSNs verified against the NLM catalog and live PubMed counts on 2026-10-15. `freePct` = share of 2025 articles
+free to read (PubMed `free full text[sb]`; Crossref: CC licence). Tiers: ≥ 95 Free to read, ≥ 20 Partly free,
+else Mostly subscription; journal menus list free journals first.
+
+**Free first (added after launch feedback):** the app is for postgraduates, so Browse/Search default to
+"Free to read only" (`free full text[sb]` on PubMed, CC-licence filter on Crossref; URL `all=1` turns it off).
+In the mixed view, one extra esearch per page (`<pmids>[uid] AND free full text[sb]`) marks free articles
+immediately, instead of waiting months for Europe PMC deposit. Free articles link to PMC full text, or to
+the publisher's free full text when there's no PMC copy.
+
+Free journals added for volume (all 100% free, OMFS-filtered): BMC Oral Health, Dentistry Journal,
+J Clin Exp Dent, Clin Exp Dent Res, Int J Surg Case Rep, Front Dent Med, Imaging Sci Dent, Int J Oral Sci (China).
 
 - `broad` journals (Oral Oncol, Oral Dis, Clin Oral Investig, Quintessence Int, Aust Dent J, J Can Dent Assoc,
   Head Neck, JAMA Otolaryngol, PRS Global Open, Microsurgery, J Reconstr Microsurg, ANZ J Surg, Indian J Plast Surg,

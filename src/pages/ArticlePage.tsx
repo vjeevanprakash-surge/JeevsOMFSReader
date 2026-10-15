@@ -115,9 +115,19 @@ export default function ArticlePage() {
             Read PDF online
           </a>
         )}
+        {a.isOpenAccess && a.pmcid && (
+          <a className="btn btn-free-outline" href={`https://pmc.ncbi.nlm.nih.gov/articles/${a.pmcid}/`} target="_blank" rel="noreferrer">
+            Read full text (PMC)
+          </a>
+        )}
         {a.doi && (
-          <a className="btn" href={`https://doi.org/${a.doi}`} target="_blank" rel="noreferrer">
-            {a.isOpenAccess ? 'Publisher page' : '🔒 Publisher page'}
+          <a
+            className={`btn ${a.isOpenAccess && !a.pmcid ? 'btn-free-outline' : ''}`}
+            href={`https://doi.org/${a.doi}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {a.isOpenAccess ? (a.pmcid ? 'Publisher page' : 'Read full text (publisher)') : '🔒 Publisher page'}
           </a>
         )}
         {a.pmid && (

@@ -5,6 +5,8 @@ An installable web app (PWA) for Oral & Maxillofacial Surgery research. It pulls
 **Crossref** for journals that PubMed doesn't index. It has no server of its own: everything runs in the
 browser and is saved on the device.
 
+- **Free to read first**: Browse and Search show only free full-text articles by default (switch off to include
+  subscription articles); journals are grouped by how much they publish free
 - Browse by region, journal, topic and year; search by keyword or author
 - Green frosted cards = free to read · blue cards with a padlock = subscription
 - "New" badge on articles recently added to PubMed/Crossref
@@ -25,7 +27,8 @@ Open http://localhost:5173. Tests: `npm test`. Production build: `npm run build`
 
 Add one line to [`src/data/journals.ts`](src/data/journals.ts), with its print/electronic ISSNs and region.
 Use `source: 'crossref'` if PubMed has no records for it, `broad: true` if it publishes a lot outside OMFS
-(results are then limited to OMFS-relevant articles), and `openAccess: true` if it's listed in DOAJ.
+(results are then limited to OMFS-relevant articles), and set `freePct` to the share of its articles that are
+free to read (PubMed: `<issn>[is] AND 2025[dp] AND free full text[sb]` vs. without the filter).
 
 ## Offline PDFs and hosting
 

@@ -6,6 +6,7 @@ import type { Article, ArticleQuery, Author, Journal } from './types';
 
 const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
 export const PAGE_SIZE = 20;
+const FREE_FILTER = 'free full text[sb]';
 
 const MONTHS: Record<string, string> = {
   jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
@@ -28,6 +29,8 @@ export function buildPubmedTerm(journals: Journal[], q: ArticleQuery): string {
   if (q.yearFrom || q.yearTo) parts.push(`${q.yearFrom ?? 1900}:${q.yearTo ?? 3000}[dp]`);
   if (q.keyword?.trim()) parts.push(`(${q.keyword.trim()})[tiab]`);
   if (q.author?.trim()) parts.push(`${q.author.trim()}[au]`);
+  // PubMed's "free full text" subset: free on PMC or at the publisher, flagged as soon as it's indexed.
+  if (q.freeOnly) parts.push(FREE_FILTER);
   return parts.join(' AND ');
 }
 
@@ -52,14 +55,25 @@ export async function searchPubmed(journals: Journal[], q: ArticleQuery): Promis
   const json = await res.json();
   const ids: string[] = json.esearchresult?.idlist ?? [];
   const total = Number(json.esearchresult?.count ?? 0);
-  return { articles: await fetchPubmed(ids), total };
+  return { articles: await fetchPubmed(ids, q.freeOnly), total };
 }
 
-export async function fetchPubmed(pmids: string[]): Promise<Article[]> {
+/** Which of these PMIDs PubMed lists as free full text. */
+async function freePmids(pmids: string[]): Promise<Set<string>> {
+  const p = params({ db: 'pubmed', retmode: 'json', retmax: String(pmids.length) });
+  p.set('term', `(${pmids.map((id) => `${id}[uid]`).join(' OR ')}) AND ${FREE_FILTER}`);
+  const res = await limitedFetch(`${EUTILS}esearch.fcgi`, interval(), { method: 'POST', body: p });
+  return new Set((await res.json()).esearchresult?.idlist ?? []);
+}
+
+/** Fetches full records; `allFree` skips the free-text check when the search was already free-only. */
+export async function fetchPubmed(pmids: string[], allFree = false): Promise<Article[]> {
   if (!pmids.length) return [];
   const p = params({ db: 'pubmed', retmode: 'xml', id: pmids.join(',') });
   const res = await limitedFetch(`${EUTILS}efetch.fcgi`, interval(), { method: 'POST', body: p });
-  return parsePubmedXml(await res.text());
+  const articles = parsePubmedXml(await res.text());
+  const free = allFree ? undefined : await freePmids(pmids).catch(() => new Set<string>());
+  return articles.map((a) => ({ ...a, isOpenAccess: a.isOpenAccess || !free || free.has(a.pmid!) }));
 }
 
 const text = (el: Element | null | undefined) => el?.textContent?.trim() ?? '';
@@ -139,7 +153,7 @@ export function parsePubmedXml(xml: string): Article[] {
       year: Number(pubDate.slice(0, 4)),
       keywords,
       topics: classify({ title, keywords, abstract }),
-      isOpenAccess: !!journal?.openAccess,
+      isOpenAccess: (journal?.freePct ?? 0) >= 95,
     } satisfies Article;
   });
 }

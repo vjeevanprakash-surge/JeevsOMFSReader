@@ -1,4 +1,4 @@
-import { JOURNALS, REGIONS } from '../data/journals';
+import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, REGIONS } from '../data/journals';
 import { TOPICS } from '../data/topics';
 import type { Region } from '../lib/types';
 
@@ -8,6 +8,8 @@ export interface FilterState {
   topic: string;
   yearFrom: string;
   yearTo: string;
+  /** On by default: postgraduates should land on articles they can actually read. */
+  freeOnly: boolean;
 }
 
 const THIS_YEAR = new Date().getFullYear();
@@ -15,10 +17,18 @@ const YEARS = Array.from({ length: 30 }, (_, i) => String(THIS_YEAR - i));
 
 export default function Filters({ value, onChange }: { value: FilterState; onChange: (v: FilterState) => void }) {
   const set = (patch: Partial<FilterState>) => onChange({ ...value, ...patch });
-  const journals = JOURNALS.filter((j) => !value.region || j.region === value.region);
+  const journals = JOURNALS.filter((j) => !value.region || j.region === value.region).sort(byFreeAccess);
 
   return (
     <div className="filters">
+      <label className={`free-toggle ${value.freeOnly ? 'on' : ''}`}>
+        <input type="checkbox" checked={value.freeOnly} onChange={(e) => set({ freeOnly: e.target.checked })} />
+        <span className="switch" aria-hidden />
+        <span>
+          <strong>Free to read only</strong>
+          <small>{value.freeOnly ? 'Showing articles you can open in full' : 'Including subscription articles'}</small>
+        </span>
+      </label>
       <div className="region-chips" role="group" aria-label="Region">
         {(['', ...REGIONS] as const).map((r) => (
           <button
@@ -37,11 +47,21 @@ export default function Filters({ value, onChange }: { value: FilterState; onCha
           Journal
           <select value={value.journal} onChange={(e) => set({ journal: e.target.value })}>
             <option value="">All journals ({journals.length})</option>
-            {journals.map((j) => (
-              <option key={j.id} value={j.id}>
-                {j.name}
-              </option>
-            ))}
+            {ACCESS_TIERS.map(({ tier, label }) => {
+              const group = journals.filter((j) => accessTier(j) === tier);
+              return (
+                group.length > 0 && (
+                  <optgroup key={tier} label={`${label} (${group.length})`}>
+                    {group.map((j) => (
+                      <option key={j.id} value={j.id}>
+                        {j.name}
+                        {tier !== 'free' ? ` — ${j.freePct}% free` : ''}
+                      </option>
+                    ))}
+                  </optgroup>
+                )
+              );
+            })}
           </select>
         </label>
         <label>
@@ -86,11 +106,16 @@ export function filtersFromParams(p: URLSearchParams): FilterState {
     topic: p.get('topic') ?? '',
     yearFrom: p.get('from') ?? '',
     yearTo: p.get('to') ?? '',
+    freeOnly: p.get('all') !== '1',
   };
 }
 
 export function filtersToParams(f: FilterState, extra: Record<string, string> = {}) {
-  const entries = { region: f.region, journal: f.journal, topic: f.topic, from: f.yearFrom, to: f.yearTo, ...extra };
+  const entries = {
+    region: f.region, journal: f.journal, topic: f.topic, from: f.yearFrom, to: f.yearTo,
+    all: f.freeOnly ? '' : '1',
+    ...extra,
+  };
   return new URLSearchParams(Object.entries(entries).filter(([, v]) => v) as [string, string][]);
 }
 
@@ -101,5 +126,6 @@ export function filtersToQuery(f: FilterState) {
     topic: f.topic || undefined,
     yearFrom: f.yearFrom ? Number(f.yearFrom) : undefined,
     yearTo: f.yearTo ? Number(f.yearTo) : undefined,
+    freeOnly: f.freeOnly || undefined,
   };
 }

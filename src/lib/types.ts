@@ -5,6 +5,7 @@ export type Region =
   | 'India'
   | 'Korea'
   | 'Japan'
+  | 'China'
   | 'Asia'
   | 'Australia'
   | 'Canada';
@@ -20,8 +21,8 @@ export interface Journal {
   source: 'pubmed' | 'crossref';
   /** Publishes a lot outside OMFS: results are AND-ed with an OMFS relevance filter. */
   broad?: boolean;
-  /** Fully open-access journal (listed in DOAJ): every article is free to read. */
-  openAccess?: boolean;
+  /** % of the journal's 2025 articles that are free to read (see journals.ts). ≥ 95 = every article free. */
+  freePct: number;
 }
 
 export interface Author {
@@ -67,6 +68,8 @@ export interface ArticleQuery {
   yearTo?: number;
   keyword?: string;
   author?: string;
+  /** Only articles that are free to read. */
+  freeOnly?: boolean;
   page: number;
 }
 
