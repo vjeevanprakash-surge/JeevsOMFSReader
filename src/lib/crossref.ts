@@ -22,7 +22,9 @@ interface CrossrefWork {
   page?: string;
   subject?: string[];
   license?: { URL: string }[];
-  link?: { URL: string; 'content-type'?: string }[];
+  link?: { URL: string; 'content-type'?: string; 'intended-application'?: string }[];
+  ISSN?: string[];
+  'container-title'?: string[];
   published?: { 'date-parts': number[][] };
   issued?: { 'date-parts': number[][] };
   created?: { 'date-time': string };
@@ -36,7 +38,8 @@ export function mapCrossrefWork(w: CrossrefWork, journal: Journal): Article {
   const title = stripTags(w.title?.[0] ?? '(untitled)');
   const abstract = stripTags(w.abstract ?? '').replace(/^Abstract\s*/i, '');
   const isOpenAccess = journal.freePct >= 95 || (w.license ?? []).some((l) => /creativecommons\.org/i.test(l.URL));
-  const pdf = w.link?.find((l) => l['content-type'] === 'application/pdf')?.URL;
+  // Text-mining links are publisher API endpoints, not something a reader can open.
+  const pdf = w.link?.find((l) => l['content-type'] === 'application/pdf' && l['intended-application'] !== 'text-mining')?.URL;
   return {
     id: `doi:${w.DOI.toLowerCase()}`,
     doi: w.DOI,
@@ -111,4 +114,15 @@ export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows:
   } catch (e) {
     return { articles: [] as Article[], total: 0, errors: [`Crossref: ${(e as Error).message}`] };
   }
+}
+
+/** One work by DOI, for opening an article that isn't stored on this device (e.g. a shared link). */
+export async function fetchCrossrefWork(doi: string): Promise<Article | undefined> {
+  const res = await limitedFetch(`${API}/works/${encodeURIComponent(doi)}`, 1100);
+  const w = (await res.json()).message as CrossrefWork;
+  const journal: Journal = (w.ISSN ?? []).map(journalByIssn).find(Boolean) ?? {
+    id: '', name: w['container-title']?.[0] ?? '', abbr: w['container-title']?.[0] ?? '',
+    region: 'USA', issns: w.ISSN ?? [], source: 'crossref', freePct: 0,
+  };
+  return mapCrossrefWork(w, journal);
 }

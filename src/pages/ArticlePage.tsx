@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { formatDate } from '../components/ArticleCard';
 import BookmarkButton from '../components/BookmarkButton';
 import { journalById } from '../data/journals';
@@ -7,30 +7,34 @@ import { downloadText, toBibtex, toVancouver } from '../lib/citation';
 import { cacheArticles, deletePdf, getArticle, getPdf } from '../lib/db';
 import { enrichOpenAccess } from '../lib/europepmc';
 import { canCachePdf, downloadPdf, isNew, openCachedPdf } from '../lib/pdf';
+import { fetchCrossrefWork } from '../lib/crossref';
 import { fetchPubmed } from '../lib/pubmed';
+import { parseArticleId } from '../lib/routes';
 import type { Article } from '../lib/types';
 
+/** From device storage, else fetched again (a shared link, or storage unavailable). */
 async function loadArticle(id: string): Promise<Article | undefined> {
-  const cached = await getArticle(id);
+  const cached = await getArticle(id).catch(() => undefined);
   if (cached) return cached;
-  // Deep link to an article not seen on this device yet.
-  if (id.startsWith('pmid:')) {
-    const fetched = await enrichOpenAccess(await fetchPubmed([id.slice(5)]));
-    return (await cacheArticles(fetched))[0];
-  }
+  let fetched: Article[] = [];
+  if (id.startsWith('pmid:')) fetched = await enrichOpenAccess(await fetchPubmed([id.slice(5)]));
+  else if (id.startsWith('doi:')) fetched = [await fetchCrossrefWork(id.slice(4))].filter((x): x is Article => !!x);
+  return (await cacheArticles(fetched).catch(() => fetched))[0];
 }
 
 export default function ArticlePage() {
-  const id = decodeURIComponent(useParams().id ?? '');
+  const id = parseArticleId(useParams()['*']);
   const navigate = useNavigate();
-  const [a, setA] = useState<Article | null | undefined>();
+  // A tapped card passes its article along, so the page shows at once without a storage round trip.
+  const passed = (useLocation().state as { article?: Article } | null)?.article;
+  const [a, setA] = useState<Article | null | undefined>(passed?.id === id ? passed : undefined);
   const [hasPdf, setHasPdf] = useState(false);
   const [pdfState, setPdfState] = useState<'idle' | 'busy' | string>('idle');
 
   useEffect(() => {
-    loadArticle(id).then((x) => setA(x ?? null)).catch(() => setA(null));
+    if (passed?.id !== id) loadArticle(id).then((x) => setA(x ?? null)).catch(() => setA(null));
     getPdf(id).then((p) => setHasPdf(!!p)).catch(() => undefined);
-  }, [id]);
+  }, [id, passed]);
 
   if (a === undefined) return <p className="empty">Loading…</p>;
   if (a === null)

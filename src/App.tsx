@@ -73,10 +73,18 @@ function Shell() {
           <Routes>
             <Route path="/" element={<BrowsePage />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/article/:id" element={<ArticlePage />} />
+            <Route path="/article/*" element={<ArticlePage />} />
             <Route path="/saved" element={<SavedPage />} />
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route
+              path="*"
+              element={
+                <p className="empty">
+                  Page not found. <NavLink to="/">Back to browse</NavLink>
+                </p>
+              }
+            />
           </Routes>
         </div>
       </main>

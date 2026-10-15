@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { journalById } from '../data/journals';
 import { isNew } from '../lib/pdf';
+import { articlePath } from '../lib/routes';
 import type { Article } from '../lib/types';
 import BookmarkButton from './BookmarkButton';
 
@@ -30,7 +31,9 @@ export default function ArticleCard({ article: a, index = 0 }: { article: Articl
         <BookmarkButton id={a.id} />
       </div>
       <h3 className="card-title">
-        <Link to={`/article/${encodeURIComponent(a.id)}`}>{a.title}</Link>
+        <Link to={articlePath(a.id)} state={{ article: a }}>
+          {a.title}
+        </Link>
       </h3>
       <p className="card-authors">{shortAuthors(a)}</p>
       <p className="card-meta">

@@ -142,3 +142,15 @@ describe('free access', () => {
     expect(parsePubmedXml(xml)[0].isOpenAccess).toBe(true); // Head & Face Medicine
   });
 });
+
+describe('article routes', () => {
+  it('keeps DOI slashes readable and survives browsers that decode the hash', async () => {
+    const { articlePath, parseArticleId } = await import('./routes');
+    const id = 'doi:10.1016/j.oor.2026.100804';
+    expect(articlePath(id)).toBe('/article/doi:10.1016/j.oor.2026.100804');
+    expect(parseArticleId('doi:10.1016/j.oor.2026.100804')).toBe(id); // decoded by the browser
+    expect(parseArticleId('doi%3A10.1016%2Fj.oor.2026.100804')).toBe(id); // old encoded links
+    expect(parseArticleId(articlePath('doi:10.1002/(SICI)1097#x?y').slice(9))).toBe('doi:10.1002/(SICI)1097#x?y');
+    expect(parseArticleId('doi:10.1/50%off')).toBe('doi:10.1/50%off'); // literal % does not throw
+  });
+});
