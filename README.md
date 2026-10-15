@@ -1,4 +1,4 @@
-# OMFS Reader
+# JeevsOMFSReader
 
 An installable web app (PWA) for Oral & Maxillofacial Surgery research. It pulls articles live from
 **PubMed** (matched by journal ISSN), checks open-access status and PDFs with **Europe PMC**, and uses
@@ -50,3 +50,7 @@ then paste the worker's URL into **Settings → PDF proxy URL**. Without a proxy
 ```bash
 npm test
 ```
+
+## License
+
+GPL-3.0 — see [LICENSE](LICENSE).
