@@ -1,6 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0f3b5f"/>
-  <path d="M136 200c0-62 54-104 120-104s120 42 120 104c0 48-22 76-36 112-12 32-18 104-52 104-26 0-24-58-32-86-8 28-6 86-32 86-34 0-40-72-52-104-14-36-36-64-36-112z" fill="#ffffff"/>
-  <circle cx="396" cy="396" r="64" fill="#12805c"/>
-  <path d="M396 366v60M366 396h60" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f3b5f"/>
+      <stop offset="0.55" stop-color="#1c6e8c"/>
+      <stop offset="1" stop-color="#12805c"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <!-- Open book: two pages meeting at the spine -->
+  <path d="M248 132c-40-26-96-34-140-24v168c44-10 100-2 140 24z" fill="#ffffff"/>
+  <path d="M264 132c40-26 96-34 140-24v168c-44-10-100-2-140 24z" fill="#ffffff" fill-opacity="0.9"/>
+  <!-- Lines of text on the pages -->
+  <g stroke="#1c6e8c" stroke-width="10" stroke-linecap="round" stroke-opacity="0.35">
+    <path d="M140 158c28-4 56 0 80 10M140 194c28-4 56 0 80 10M140 230c28-4 56 0 80 10"/>
+    <path d="M372 158c-28-4-56 0-80 10M372 194c-28-4-56 0-80 10"/>
+  </g>
+  <!-- Mandible beneath the book: rami rising on both sides -->
+  <path d="M112 318v30c22 60 82 96 144 96s122-36 144-96v-30" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Spark: something new to read -->
+  <circle cx="392" cy="96" r="28" fill="#6ee7b7"/>
 </svg>

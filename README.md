@@ -1,5 +1,7 @@
 # JeevsOMFSReader
 
+*Rekindling the reading habit, one paper at a time.*
+
 An installable web app (PWA) for Oral & Maxillofacial Surgery research. It pulls articles live from
 **PubMed** (matched by journal ISSN), checks open-access status and PDFs with **Europe PMC**, and uses
 **Crossref** for journals that PubMed doesn't index. It has no server of its own: everything runs in the
@@ -12,7 +14,9 @@ browser and is saved on the device.
 - "New" badge on articles recently added to PubMed/Crossref
 - Save articles (bookmarks), export citations (Vancouver / BibTeX, `.txt`)
 - Save open-access PDFs for offline reading
-- Stats dashboard; installable on phone home screens and desktop
+- Stats dashboard
+- Installable app: an **Install** button on Android and desktop Chrome/Edge; step-by-step
+  "Add to Home Screen" instructions on iPhone/iPad (Apple offers no install prompt)
 
 ## Run it
 

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS } from '../data/journals';
+import InstallBanner from '../components/InstallBanner';
 import { DEFAULT_PDF_PROXY } from '../lib/pdf';
 import { getSettings, saveSettings } from '../lib/settings';
 
@@ -51,6 +52,10 @@ export default function SettingsPage() {
           {saved ? 'Saved ✓' : 'Save settings'}
         </button>
       </form>
+      <section className="panel">
+        <h2>Install the app</h2>
+        <InstallBanner always />
+      </section>
       <section className="panel">
         <h2>Journals ({JOURNALS.length})</h2>
         {ACCESS_TIERS.map(({ tier, label }) => {

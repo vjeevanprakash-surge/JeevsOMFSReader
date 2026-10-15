@@ -8,7 +8,9 @@ export type Region =
   | 'China'
   | 'Asia'
   | 'Australia'
-  | 'Canada';
+  | 'Canada'
+  | 'Latin America'
+  | 'Middle East';
 
 export interface Journal {
   id: string;

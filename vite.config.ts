@@ -37,7 +37,10 @@ export default defineConfig({
       manifest: {
         name: 'OMFS Reader',
         short_name: 'OMFS Reader',
-        description: 'Oral & Maxillofacial Surgery research from PubMed and Europe PMC',
+        description: 'Rekindling the reading habit, one paper at a time. Free OMFS research from PubMed, Europe PMC and Crossref.',
+        id: './',
+        scope: './',
+        categories: ['education', 'medical', 'books'],
         theme_color: '#0f3b5f',
         background_color: '#f4f7fa',
         display: 'standalone',
@@ -51,6 +54,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: 'index.html',
+        // App shell plus the Latin font files, so the installed app looks the same offline.
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}', 'assets/*-latin-*.woff2', 'assets/*-latin-ext-*.woff2'],
         runtimeCaching: [
           {
             // API responses: fresh when online, cached copy when offline.

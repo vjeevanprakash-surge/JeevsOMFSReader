@@ -6,6 +6,7 @@ import SavedPage from './pages/SavedPage';
 import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
+import { APP_NAME, TAGLINE } from './data/brand';
 
 const NAV = [
   { to: '/', label: 'Browse', icon: '▦' },
@@ -48,11 +49,14 @@ function Shell() {
         <span />
       </div>
       <header className="topbar glass">
-        <NavLink to="/" className="brand">
-          <span className="brand-mark" aria-hidden>
-            ✚
+        <NavLink to="/" className="brand" aria-label={`${APP_NAME} home`}>
+          <img className="brand-logo" src={`${import.meta.env.BASE_URL}favicon.svg`} width={36} height={36} alt="" />
+          <span className="brand-text">
+            <span className="brand-name">
+              OMFS <span>Reader</span>
+            </span>
+            <span className="brand-tag">{TAGLINE}</span>
           </span>
-          OMFS <span>Reader</span>
         </NavLink>
       </header>
       {/* Outside the header: a blurred (backdrop-filter) header would trap a fixed bottom bar. */}

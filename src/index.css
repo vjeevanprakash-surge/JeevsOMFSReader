@@ -42,7 +42,12 @@
   --gutter: clamp(16px, 3vw, 40px);
   --header-h: 60px;
 
-  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  /* Type: Plus Jakarta Sans for headings and brand, Inter for reading. Both self-hosted (work offline). */
+  --font-display: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter Variable', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  font-family: var(--font-body);
+  font-optical-sizing: auto;
+  line-height: 1.5;
   color: var(--ink);
   color-scheme: light dark;
   -webkit-tap-highlight-color: transparent;
@@ -86,7 +91,8 @@ body {
 }
 
 a { color: var(--brand-2); }
-h1, h2, h3 { line-height: 1.25; margin: 0; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; margin: 0; letter-spacing: -0.015em; }
+.tile-value, .filters-count, .badge-new, .access { font-family: var(--font-display); }
 button, input, select { font: inherit; color: inherit; }
 .muted { color: var(--ink-2); font-weight: 400; }
 :focus-visible { outline: 2px solid var(--brand-2); outline-offset: 2px; }
@@ -131,15 +137,19 @@ button, input, select { font: inherit; color: inherit; }
   border-width: 0 0 1px; border-radius: 0;
   background: var(--glass-strong);
 }
-.brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 1.12rem; color: var(--brand); text-decoration: none; min-height: 44px; }
-.brand span:last-child { font-weight: 400; }
-.brand-mark {
-  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; font-size: 0.95rem;
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--brand-2) 40%, transparent);
-  transition: transform 0.4s var(--spring);
+.brand { display: flex; align-items: center; gap: 11px; color: var(--brand); text-decoration: none; min-height: 44px; min-width: 0; }
+.brand-logo {
+  flex: none; width: 36px; height: 36px; border-radius: 10px;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--brand-2) 35%, transparent);
+  transition: transform 0.45s var(--spring);
 }
-.brand:hover .brand-mark { transform: rotate(90deg) scale(1.05); }
+.brand:hover .brand-logo { transform: rotate(-6deg) scale(1.06); }
+.brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.brand-name { font-family: var(--font-display); font-weight: 800; font-size: 1.14rem; letter-spacing: -0.02em; white-space: nowrap; }
+.brand-name span { font-weight: 500; }
+.brand-tag { font-size: 0.75rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Tagline only where there is room beside the nav. */
+@media (min-width: 720px) and (max-width: 1099px) { .brand-tag { display: none; } }
 
 /* Desktop/tablet: nav sits in the header row. */
 .nav {
@@ -188,17 +198,26 @@ button, input, select { font: inherit; color: inherit; }
 .page { animation: page-in 0.35s var(--ease) backwards; }
 @keyframes page-in { from { opacity: 0; transform: translateY(8px); } }
 
-.page-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
-.page-head h1 { font-size: clamp(1.55rem, 1.1rem + 1.6vw, 2.3rem); letter-spacing: -0.02em; }
-.lede { flex: 1 0 100%; margin: 4px 0 0; color: var(--ink-2); }
+.page-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 6px 12px; margin-bottom: 20px; }
+.page-head h1 { font-size: clamp(1.6rem, 1.15rem + 1.6vw, 2.4rem); font-weight: 750; letter-spacing: -0.03em; }
+.eyebrow {
+  flex: 1 0 100%; margin: 0; font-family: var(--font-display); font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--free);
+}
+.lede { flex: 1 0 100%; margin: 2px 0 0; color: var(--ink-2); font-size: 1.02rem; }
 
 /* Sidebar layout (desktop); stacked above results on tablet and phone. */
-.layout { display: block; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "side" "main"; }
+.layout > .page-head { grid-area: head; }
+.layout > .sidebar { grid-area: side; }
+.layout > .results { grid-area: main; }
 .sidebar { border-radius: var(--radius); padding: 14px; margin-bottom: 18px; }
 @media (min-width: 1100px) {
-  .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 26px; align-items: start; }
+  /* Heading sits in the results column: its left edge lines up with the cards, its top with the filters. */
+  .layout { grid-template-columns: 300px minmax(0, 1fr); grid-template-areas: "side head" "side main"; grid-template-rows: auto 1fr; column-gap: 26px; align-items: start; }
+  .layout > .page-head { margin-top: 2px; }
   .sidebar {
-    position: sticky; top: calc(var(--header-h) + 18px); margin: 0; padding: 18px;
+    grid-row: 1 / -1; position: sticky; top: calc(var(--header-h) + 18px); margin: 0; padding: 18px;
     max-height: calc(100vh - var(--header-h) - 36px); overflow-y: auto; scrollbar-width: thin;
   }
 }
@@ -490,4 +509,26 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
   .glass, .panel, .abstract, .cite, .tile, .settings { background-color: var(--surface); }
   .card-free, .detail-hero.card-free { background-color: color-mix(in srgb, var(--free) 10%, var(--surface)); }
   .card-paid, .detail-hero.card-paid { background-color: color-mix(in srgb, var(--paid) 9%, var(--surface)); }
+}
+
+/* ==========================================================================
+   Install banner
+   ========================================================================== */
+.install { display: flex; align-items: center; gap: 14px; padding: 12px 14px; margin-bottom: 18px; border-radius: var(--radius); animation: drop-in 0.4s var(--ease); }
+.install-logo { flex: none; border-radius: 11px; }
+.install-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.install-text strong { font-family: var(--font-display); }
+.install-text span { color: var(--ink-2); font-size: 0.9rem; }
+.install-steps { margin: 6px 0 0; padding-left: 20px; font-size: 0.9rem; display: grid; gap: 4px; }
+.install-steps svg { vertical-align: -2px; }
+.install-actions { display: flex; align-items: center; gap: 4px; flex: none; }
+.install-close { min-width: 40px; min-height: 40px; border: 0; border-radius: 10px; background: none; color: var(--ink-2); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.install-close:hover { background: color-mix(in srgb, var(--ink-2) 12%, transparent); }
+.panel .install { margin: 0; box-shadow: none; }
+@media (max-width: 719px) {
+  .install { position: relative; flex-wrap: wrap; align-items: flex-start; padding-right: 44px; }
+  .install-actions { width: 100%; }
+  .install-actions:not(:has(.btn)) { display: contents; }
+  .install-actions .btn { flex: 1; justify-content: center; }
+  .install-close { position: absolute; top: 4px; right: 4px; }
 }

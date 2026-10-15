@@ -20,10 +20,11 @@ export default function SearchPage() {
 
   return (
     <>
-      <div className="page-head">
-        <h1>Search</h1>
-      </div>
       <div className="layout">
+        <header className="page-head">
+          <h1>Search</h1>
+          <p className="lede">Find papers by keyword or author across every journal.</p>
+        </header>
         <aside className="sidebar glass" aria-label="Filters">
           <Filters value={filters} onChange={(f) => setParams(filtersToParams(f, { q, by: mode }), { replace: true })} />
         </aside>
