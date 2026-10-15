@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS } from '../data/journals';
+import { DEFAULT_PDF_PROXY } from '../lib/pdf';
 import { getSettings, saveSettings } from '../lib/settings';
 
 export default function SettingsPage() {
@@ -42,9 +43,9 @@ export default function SettingsPage() {
           <small>NCBI and Crossref ask apps to include a contact email; Crossref then allows faster requests. Leave blank to send none.</small>
         </label>
         <label>
-          PDF proxy URL <span className="muted">(for offline PDFs)</span>
-          <input type="url" placeholder="https://omfs-pdf-proxy.example.workers.dev" {...field('pdfProxyUrl')} />
-          <small>Leave blank when running locally. For a hosted copy, deploy the worker in the proxy/ folder.</small>
+          PDF proxy URL <span className="muted">(optional)</span>
+          <input type="url" placeholder={DEFAULT_PDF_PROXY} {...field('pdfProxyUrl')} />
+          <small>Offline PDFs work out of the box through the app's own proxy. Only fill this in to use a different one.</small>
         </label>
         <button type="submit" className="btn btn-primary">
           {saved ? 'Saved ✓' : 'Save settings'}

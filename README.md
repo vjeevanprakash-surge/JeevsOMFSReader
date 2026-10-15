@@ -33,14 +33,13 @@ free to read (PubMed: `<issn>[is] AND 2025[dp] AND free full text[sb]` vs. witho
 ## Offline PDFs and hosting
 
 Open-access PDFs come from PMC's open data on AWS, which doesn't allow direct browser downloads. A tiny proxy
-([`proxy/`](proxy/)) fixes that. In `npm run dev` / `npm run preview` it's built in. When hosting the app
-elsewhere (GitHub Pages, Netlify…), deploy the proxy as a free Cloudflare Worker:
+([`proxy/`](proxy/)) fixes that: it only serves PMC open-access PDFs (`/pdf/PMC…`) and nothing else.
 
-```bash
-cd proxy && npx wrangler deploy
-```
+- **Local** (`npm run dev` / `npm run preview`): built into the dev server.
+- **Hosted**: deployed as a Cloudflare Worker at https://omfs-pdf-proxy.jeevs-omfs.workers.dev (free plan),
+  which the app uses by default. To redeploy after changing it: `cd proxy && npx wrangler deploy`.
 
-then paste the worker's URL into **Settings → PDF proxy URL**. Without a proxy, PDFs still open online in a new tab.
+The app is hosted on GitHub Pages and redeploys automatically on every push to `main`.
 
 ## Optional settings
 

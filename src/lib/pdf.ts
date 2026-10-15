@@ -2,20 +2,23 @@ import { getPdf, savePdf } from './db';
 import { getSettings } from './settings';
 import type { Article } from './types';
 
-/** A PDF proxy is reachable: configured in Settings, or built into the local dev/preview server. */
-const hasPdfProxy = () =>
-  !!getSettings().pdfProxyUrl || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+/** The deployed Cloudflare Worker (proxy/), used unless Settings names another proxy. */
+export const DEFAULT_PDF_PROXY = 'https://omfs-pdf-proxy.jeevs-omfs.workers.dev';
 
-/** True when the PDF can be downloaded for offline use (open access with a PMC copy, and a proxy). */
-export const canCachePdf = (a: Article) => a.isOpenAccess && !!a.pmcid && hasPdfProxy();
+const isLocal = () => ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+
+/** Proxy base URL: Settings override, else the dev/preview server's built-in one locally, else the Worker. */
+const pdfProxyBase = () => (getSettings().pdfProxyUrl || (isLocal() ? '' : DEFAULT_PDF_PROXY)).replace(/\/$/, '');
+
+/** True when the PDF can be downloaded for offline use (open access with a PMC copy). */
+export const canCachePdf = (a: Article) => a.isOpenAccess && !!a.pmcid;
 
 /**
  * Downloads the open-access PDF through the PDF proxy (PMC Open Data does not send CORS headers)
  * and stores it in IndexedDB.
  */
 export async function downloadPdf(a: Article): Promise<Blob> {
-  const base = getSettings().pdfProxyUrl.replace(/\/$/, '');
-  const res = await fetch(`${base}/pdf/${a.pmcid}`);
+  const res = await fetch(`${pdfProxyBase()}/pdf/${a.pmcid}`);
   if (!res.ok) throw new Error(res.status === 404 ? 'No PDF in the PMC open-access set' : `PDF proxy responded ${res.status}`);
   const blob = await res.blob();
   if (!blob.type.includes('pdf')) throw new Error('PDF proxy did not return a PDF');
