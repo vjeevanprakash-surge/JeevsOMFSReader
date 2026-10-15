@@ -88,7 +88,7 @@ export default function ArticlePage() {
       </div>
 
       <div className="actions">
-        {canCachePdf(a) &&
+        {(hasPdf || canCachePdf(a)) &&
           (hasPdf ? (
             <>
               <button type="button" className="btn btn-free" onClick={() => openCachedPdf(a.id)}>

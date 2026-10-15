@@ -2,8 +2,12 @@ import { getPdf, savePdf } from './db';
 import { getSettings } from './settings';
 import type { Article } from './types';
 
-/** True when the PDF can be downloaded for offline use (open access with a PMC copy). */
-export const canCachePdf = (a: Article) => a.isOpenAccess && !!a.pmcid;
+/** A PDF proxy is reachable: configured in Settings, or built into the local dev/preview server. */
+const hasPdfProxy = () =>
+  !!getSettings().pdfProxyUrl || ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+
+/** True when the PDF can be downloaded for offline use (open access with a PMC copy, and a proxy). */
+export const canCachePdf = (a: Article) => a.isOpenAccess && !!a.pmcid && hasPdfProxy();
 
 /**
  * Downloads the open-access PDF through the PDF proxy (PMC Open Data does not send CORS headers)
