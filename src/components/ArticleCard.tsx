@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { journalById } from '../data/journals';
 import { isNew } from '../lib/pdf';
@@ -13,10 +14,14 @@ export function shortAuthors(a: Article) {
   return a.authors.length > 2 ? `${first} et al.` : a.authors.map((x) => `${x.last} ${x.initials}`).join(', ');
 }
 
-export default function ArticleCard({ article: a }: { article: Article }) {
+/** `index` staggers the entrance animation (position within its page of results). */
+export default function ArticleCard({ article: a, index = 0 }: { article: Article; index?: number }) {
   const region = journalById(a.journalId)?.region;
   return (
-    <article className={`card ${a.isOpenAccess ? 'card-free' : 'card-paid'}`}>
+    <article
+      className={`card ${a.isOpenAccess ? 'card-free' : 'card-paid'}`}
+      style={{ '--i': Math.min(index, 11) } as CSSProperties}
+    >
       <div className="card-top">
         <span className={`access ${a.isOpenAccess ? 'access-free' : 'access-paid'}`}>
           {a.isOpenAccess ? 'Free' : '🔒 Subscription'}

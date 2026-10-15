@@ -80,8 +80,8 @@ export default function ArticleList({ query }: { query: Omit<ArticleQuery, 'page
         </div>
       )}
       <div className="grid">
-        {articles.map((a) => (
-          <ArticleCard key={a.id} article={a} />
+        {articles.map((a, i) => (
+          <ArticleCard key={a.id} article={a} index={i % 20} />
         ))}
         {loading && !pages[req.page] &&
           Array.from({ length: articles.length ? 2 : 6 }, (_, i) => <div key={i} className="card skeleton" />)}

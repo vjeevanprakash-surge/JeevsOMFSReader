@@ -30,8 +30,8 @@ export default function SavedPage() {
         <p className="empty">Loading…</p>
       ) : articles.length ? (
         <div className="grid">
-          {articles.map((a) => (
-            <ArticleCard key={a.id} article={a} />
+          {articles.map((a, i) => (
+            <ArticleCard key={a.id} article={a} index={i} />
           ))}
         </div>
       ) : (

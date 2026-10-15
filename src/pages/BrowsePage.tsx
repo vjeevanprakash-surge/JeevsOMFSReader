@@ -15,8 +15,14 @@ export default function BrowsePage() {
           Free-to-read research from {JOURNALS.length} OMFS journals. Green cards open in full, no subscription needed.
         </p>
       </div>
-      <Filters value={filters} onChange={(f) => setParams(filtersToParams(f), { replace: true })} />
-      <ArticleList query={filtersToQuery(filters)} />
+      <div className="layout">
+        <aside className="sidebar glass" aria-label="Filters">
+          <Filters value={filters} onChange={(f) => setParams(filtersToParams(f), { replace: true })} />
+        </aside>
+        <div className="results">
+          <ArticleList query={filtersToQuery(filters)} />
+        </div>
+      </div>
     </>
   );
 }

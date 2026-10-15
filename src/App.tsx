@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { HashRouter, NavLink, Route, Routes } from 'react-router-dom';
+import { HashRouter, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import ArticlePage from './pages/ArticlePage';
 import BrowsePage from './pages/BrowsePage';
 import SavedPage from './pages/SavedPage';
@@ -30,39 +30,64 @@ function useOnline() {
   return online;
 }
 
-export default function App() {
+function Shell() {
   const online = useOnline();
+  const { pathname } = useLocation();
+  // Braces matter: newer browsers' scrollTo returns a Promise, which React would treat as a cleanup.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
-    <HashRouter>
-      <header className="topbar">
+    <>
+      {/* Soft moving light behind the glass surfaces. */}
+      <div className="backdrop" aria-hidden>
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+      <header className="topbar glass">
         <NavLink to="/" className="brand">
           <span className="brand-mark" aria-hidden>
             ✚
           </span>
           OMFS <span>Reader</span>
         </NavLink>
-        <nav className="nav">
-          {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.to === '/'}>
-              <span className="nav-icon" aria-hidden>
-                {n.icon}
-              </span>
-              {n.label}
-            </NavLink>
-          ))}
-        </nav>
       </header>
+      {/* Outside the header: a blurred (backdrop-filter) header would trap a fixed bottom bar. */}
+      <nav className="nav glass" aria-label="Main">
+        {NAV.map((n) => (
+          <NavLink key={n.to} to={n.to} end={n.to === '/'}>
+            <span className="nav-icon" aria-hidden>
+              {n.icon}
+            </span>
+            <span className="nav-label">{n.label}</span>
+          </NavLink>
+        ))}
+      </nav>
       {!online && <div className="offline">You're offline — showing saved and cached articles.</div>}
       <main className="main">
-        <Routes>
-          <Route path="/" element={<BrowsePage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/article/:id" element={<ArticlePage />} />
-          <Route path="/saved" element={<SavedPage />} />
-          <Route path="/stats" element={<StatsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
+        {/* Keyed by route so each page fades in. */}
+        <div className="page" key={pathname}>
+          <Routes>
+            <Route path="/" element={<BrowsePage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/article/:id" element={<ArticlePage />} />
+            <Route path="/saved" element={<SavedPage />} />
+            <Route path="/stats" element={<StatsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        </div>
       </main>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <HashRouter>
+      <Shell />
     </HashRouter>
   );
 }
