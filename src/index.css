@@ -42,9 +42,9 @@
   --gutter: clamp(16px, 3vw, 40px);
   --header-h: 60px;
 
-  /* Type: Plus Jakarta Sans for headings and brand, Inter for reading. Both self-hosted (work offline). */
-  --font-display: 'Plus Jakarta Sans Variable', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'Inter Variable', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  /* Type: Clarity City (Google Fonts, OFL) throughout; self-hosted so it works offline. */
+  --font-display: 'Clarity City Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Clarity City Variable', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
   font-family: var(--font-body);
   font-optical-sizing: auto;
   line-height: 1.5;
