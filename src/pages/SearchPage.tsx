@@ -14,6 +14,9 @@ export default function SearchPage() {
   const filters = filtersFromParams(params);
   const q = params.get('q') ?? '';
   const mode = params.get('by') === 'author' ? 'author' : 'keyword';
+  // Searches default to most relevant first; ?sort=newest switches to newest first.
+  const sort = params.get('sort') === 'newest' ? 'newest' : 'relevance';
+  const keep = { q, by: mode, sort: sort === 'newest' ? 'newest' : '' };
   const [draft, setDraft] = useState(q);
   const [recent, setRecent] = useState(getRecent);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,7 +41,7 @@ export default function SearchPage() {
   };
 
   const update = (patch: Record<string, string>) =>
-    setParams(filtersToParams(filters, { q, by: mode, ...patch }), { replace: true });
+    setParams(filtersToParams(filters, { ...keep, ...patch }), { replace: true });
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -53,7 +56,7 @@ export default function SearchPage() {
           <p className="lede">Find papers by keyword or author across every journal.</p>
         </header>
         <aside className="sidebar glass" aria-label="Filters">
-          <Filters value={filters} onChange={(f) => setParams(filtersToParams(f, { q, by: mode }), { replace: true })} />
+          <Filters value={filters} onChange={(f) => setParams(filtersToParams(f, keep), { replace: true })} />
         </aside>
         <div className="results">
           <form className="search glass" onSubmit={submit} role="search">
@@ -78,7 +81,19 @@ export default function SearchPage() {
             </button>
           </form>
           {q ? (
-            <ArticleList query={{ ...filtersToQuery(filters), [mode]: q }} />
+            <>
+              <div className="sort-row">
+                <span>Sort</span>
+                <div className="seg" role="group" aria-label="Sort results">
+                  {(['relevance', 'newest'] as const).map((s) => (
+                    <button key={s} type="button" className={sort === s ? 'active' : ''} aria-pressed={sort === s} onClick={() => update({ sort: s === 'newest' ? 'newest' : '' })}>
+                      {s === 'relevance' ? 'Most relevant' : 'Newest'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <ArticleList query={{ ...filtersToQuery(filters), [mode]: q, sort }} />
+            </>
           ) : (
             <>
               <RecentChips

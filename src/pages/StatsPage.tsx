@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { journalById, REGIONS } from '../data/journals';
+import { STUDY_TYPES } from '../data/studyTypes';
 import { OTHER_TOPIC, TOPICS } from '../data/topics';
 import { allArticles, bookmarkedArticles, pdfIds } from '../lib/db';
 import type { Article } from '../lib/types';
@@ -49,6 +50,7 @@ export default function StatsPage() {
   const oa = items.filter((a) => a.isOpenAccess).length;
   const regions = count(items.map((a) => journalById(a.journalId)?.region ?? 'Other'));
   const topics = count(items.flatMap((a) => a.topics));
+  const types = count(items.map((a) => a.studyType ?? 'other'));
   const years = count(items.map((a) => a.year));
   const journals = count(items.map((a) => a.journalAbbr));
 
@@ -88,6 +90,10 @@ export default function StatsPage() {
         <Bars
           title="By topic"
           rows={[...TOPICS.map((t) => t.label), OTHER_TOPIC].filter((t) => topics.has(t)).map((t) => [t, topics.get(t)!])}
+        />
+        <Bars
+          title="By study type"
+          rows={[...STUDY_TYPES.map((t) => [t.id, t.label]), ['other', 'Other / not stated']].filter(([id]) => types.has(id)).map(([id, label]) => [label, types.get(id)!])}
         />
         <Bars title="By year" rows={[...years].sort((a, b) => b[0] - a[0]).slice(0, 12).map(([y, n]) => [String(y), n])} />
         <Bars title="Top journals" rows={[...journals].sort((a, b) => b[1] - a[1]).slice(0, 10)} />

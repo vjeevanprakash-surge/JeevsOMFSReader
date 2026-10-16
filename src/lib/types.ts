@@ -55,6 +55,8 @@ export interface Article {
   year: number;
   keywords: string[];
   topics: string[];
+  /** Strongest study type detected (see data/studyTypes.ts); absent = not identified. */
+  studyType?: string;
   isOpenAccess: boolean;
   /** Direct PDF link (opens in a new tab). */
   pdfUrl?: string;
@@ -72,6 +74,10 @@ export interface ArticleQuery {
   author?: string;
   /** Only articles that are free to read. */
   freeOnly?: boolean;
+  /** Study type id (data/studyTypes.ts). */
+  studyType?: string;
+  /** Search order; default newest. */
+  sort?: 'newest' | 'relevance';
   page: number;
 }
 

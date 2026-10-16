@@ -1,4 +1,5 @@
 import { journalByIssn } from '../data/journals';
+import { detectStudyType } from '../data/studyTypes';
 import { classify, topicById } from '../data/topics';
 import { limitedFetch } from './http';
 import { getSettings } from './settings';
@@ -64,6 +65,8 @@ export function mapCrossrefWork(w: CrossrefWork, journal: Journal): Article {
     year: y,
     keywords: w.subject ?? [],
     topics: classify({ title, keywords: w.subject, abstract }),
+    // Crossref has no publication types: the title is all there is to go on.
+    studyType: detectStudyType([], title),
     isOpenAccess,
     pdfUrl: isOpenAccess ? pdf : undefined,
   };
@@ -86,7 +89,8 @@ export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows:
   ];
   const p = new URLSearchParams({
     filter: filters.join(','),
-    sort: 'created',
+    // Relevance only means something with a search term; otherwise newest first.
+    sort: q.sort === 'relevance' && (q.keyword || q.author) ? 'score' : 'created',
     order: 'desc',
     rows: String(rows),
     offset: String(q.page * rows),
@@ -110,6 +114,7 @@ export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows:
     // Crossref has no subject index for these titles: filter topic locally (best effort per page).
     if (topic) articles = articles.filter((a) => a.topics.includes(topic.label));
     if (q.freeOnly) articles = articles.filter((a) => a.isOpenAccess);
+    if (q.studyType) articles = articles.filter((a) => a.studyType === q.studyType);
     return { articles, total: (json.message['total-results'] as number) ?? 0, errors: [] as string[] };
   } catch (e) {
     return { articles: [] as Article[], total: 0, errors: [`Crossref: ${(e as Error).message}`] };

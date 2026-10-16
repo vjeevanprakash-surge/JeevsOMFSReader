@@ -5,6 +5,7 @@ import { isNew } from '../lib/pdf';
 import { articlePath } from '../lib/routes';
 import type { Article } from '../lib/types';
 import BookmarkButton from './BookmarkButton';
+import StudyBadge from './StudyBadge';
 
 export const formatDate = (iso: string) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -16,7 +17,8 @@ export function shortAuthors(a: Article) {
 }
 
 /** `index` staggers the entrance animation (position within its page of results). */
-export default function ArticleCard({ article: a, index = 0 }: { article: Article; index?: number }) {
+/** `note`: an optional line shown under the title (e.g. why a classic paper matters). */
+export default function ArticleCard({ article: a, index = 0, note }: { article: Article; index?: number; note?: string }) {
   const region = journalById(a.journalId)?.region;
   return (
     <article
@@ -27,6 +29,7 @@ export default function ArticleCard({ article: a, index = 0 }: { article: Articl
         <span className={`access ${a.isOpenAccess ? 'access-free' : 'access-paid'}`}>
           {a.isOpenAccess ? 'Free' : '🔒 Subscription'}
         </span>
+        <StudyBadge type={a.studyType} />
         {isNew(a) && <span className="badge-new">New</span>}
         <BookmarkButton id={a.id} />
       </div>
@@ -35,6 +38,7 @@ export default function ArticleCard({ article: a, index = 0 }: { article: Articl
           {a.title}
         </Link>
       </h3>
+      {note && <p className="card-note">{note}</p>}
       <p className="card-authors">{shortAuthors(a)}</p>
       <p className="card-meta">
         <span className="journal">{a.journalAbbr}</span>

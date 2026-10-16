@@ -171,9 +171,12 @@ button, input, select { font: inherit; color: inherit; }
 .nav-icon { font-size: 1.05rem; transition: transform 0.35s var(--spring); }
 .nav a.active .nav-icon { transform: scale(1.15); }
 
-@media (min-width: 720px) and (max-width: 940px) {
-  .nav a { padding: 8px 10px; }
-  .nav-label { font-size: 0.92rem; }
+/* Tablet to small laptop: six menu items plus the name don't fit, so the menu shows icons only
+   (labels stay available to screen readers and as tooltips). */
+@media (min-width: 720px) and (max-width: 1099px) {
+  .nav a { padding: 8px 12px; }
+  .nav-icon { font-size: 1.2rem; }
+  .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 
 /* Phone: glass tab bar at the bottom. */
@@ -263,7 +266,7 @@ button, input, select { font: inherit; color: inherit; }
 .chip-btn:active { transform: scale(0.94); }
 .chip-btn.active { background: var(--brand); border-color: var(--brand); color: var(--surface); }
 
-.filter-row { display: grid; grid-template-columns: 2fr 1.3fr 0.7fr 0.7fr; gap: 10px; margin-top: 12px; }
+.filter-row { display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 0.7fr 0.7fr; gap: 10px; margin-top: 12px; }
 .filter-row label { display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; color: var(--ink-2); font-weight: 600; }
 select, input[type='search'], input[type='password'], input[type='email'], input[type='url'] {
   width: 100%; min-width: 0; min-height: 42px; padding: 9px 11px; border-radius: var(--radius-sm);
@@ -277,7 +280,7 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
 /* Desktop sidebar: one column, chips wrap. */
 @media (min-width: 1100px) {
   .sidebar .filter-row { grid-template-columns: 1fr 1fr; }
-  .sidebar .filter-row label:nth-child(-n + 2) { grid-column: 1 / -1; }
+  .sidebar .filter-row label:nth-child(-n + 3) { grid-column: 1 / -1; }
 }
 
 /* Phone: free toggle stays visible; other filters fold behind a button. */
@@ -306,7 +309,7 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
   .region-chips::-webkit-scrollbar { display: none; }
   .chip-btn { min-height: 44px; scroll-snap-align: start; }
   .filter-row { grid-template-columns: 1fr 1fr; }
-  .filter-row label:nth-child(-n + 2) { grid-column: 1 / -1; }
+  .filter-row label:nth-child(-n + 3) { grid-column: 1 / -1; }
   select { min-height: 46px; }
 }
 @keyframes drop-in { from { opacity: 0; transform: translateY(-6px); } }
@@ -578,3 +581,19 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
 .recent-chip { min-height: 36px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recent-kind { font-size: 0.72rem; font-weight: 700; color: var(--brand-2); margin-right: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
 .recent-clear { margin-left: auto; min-height: 36px; border: 0; background: none; color: var(--brand-2); font-weight: 600; cursor: pointer; padding: 0 6px; }
+
+/* Study type badges (by strength of evidence) and the search sort switch */
+.study { font-family: var(--font-display); font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.study-high { color: #5b3fc4; background: color-mix(in srgb, #7c5cff 16%, transparent); }
+.study-mid { color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 14%, transparent); }
+.study-low { color: var(--ink-2); background: color-mix(in srgb, var(--ink-2) 13%, transparent); }
+@media (prefers-color-scheme: dark) { .study-high { color: #c4b5fd; } }
+.card-top { flex-wrap: wrap; row-gap: 6px; }
+.sort-row { display: flex; align-items: center; gap: 10px; margin: -4px 0 12px; font-size: 0.86rem; color: var(--ink-2); }
+.sort-row .seg button { min-height: 34px; padding: 4px 12px; font-size: 0.86rem; }
+
+/* Classics */
+.classics-section { margin-top: 26px; }
+.classics-section h2 { font-size: 1.15rem; margin-bottom: 12px; }
+.card-note { margin: 0; font-size: 0.9rem; line-height: 1.45; color: var(--ink); padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--surface) 55%, transparent); border-left: 3px solid var(--free); }
+.card-missing { justify-content: center; }

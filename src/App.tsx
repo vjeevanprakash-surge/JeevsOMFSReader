@@ -4,6 +4,7 @@ import FloatingSearch from './components/FloatingSearch';
 import { SEARCH_SHORTCUT } from './lib/recent';
 import ArticlePage from './pages/ArticlePage';
 import BrowsePage from './pages/BrowsePage';
+import ClassicsPage from './pages/ClassicsPage';
 import SavedPage from './pages/SavedPage';
 import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
@@ -13,6 +14,7 @@ import { APP_NAME, TAGLINE } from './data/brand';
 const NAV = [
   { to: '/', label: 'Browse', icon: '▦' },
   { to: '/search', label: 'Search', icon: '⌕' },
+  { to: '/classics', label: 'Classics', icon: '❖' },
   { to: '/saved', label: 'Saved', icon: '★' },
   { to: '/stats', label: 'Stats', icon: '▤' },
   { to: '/settings', label: 'Settings', icon: '⚙' },
@@ -34,7 +36,7 @@ function useOnline() {
 }
 
 /** Pages that get the floating search bar on phones (not articles, so it never covers reading). */
-const FLOATING_SEARCH_ON = ['/', '/saved', '/stats'];
+const FLOATING_SEARCH_ON = ['/', '/classics', '/saved', '/stats'];
 
 /** Ctrl+K / ⌘K: focus the search box, opening the Search page if needed. */
 function useSearchShortcut() {
@@ -92,7 +94,7 @@ function Shell() {
             end={n.to === '/'}
             // On phones search lives in the floating bar instead of the tab bar (see CSS).
             className={n.to === '/search' ? 'nav-search' : undefined}
-            title={n.to === '/search' ? `Search (${SEARCH_SHORTCUT})` : undefined}
+            title={n.to === '/search' ? `Search (${SEARCH_SHORTCUT})` : n.label}
           >
             <span className="nav-icon" aria-hidden>
               {n.icon}
@@ -109,6 +111,7 @@ function Shell() {
             <Route path="/" element={<BrowsePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/article/*" element={<ArticlePage />} />
+            <Route path="/classics" element={<ClassicsPage />} />
             <Route path="/saved" element={<SavedPage />} />
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/settings" element={<SettingsPage />} />

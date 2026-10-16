@@ -9,7 +9,12 @@ browser and is saved on the device.
 
 - **Free to read first**: Browse and Search show only free full-text articles by default (switch off to include
   subscription articles); journals are grouped by how much they publish free
-- Browse by region, journal, topic and year; search by keyword or author
+- Browse by region, journal, topic, **study type** and year; search by keyword or author, sorted by
+  relevance or date
+- **Study-type badges** (meta-analysis, systematic review, RCT, guideline, clinical trial, cohort,
+  case report, review) from PubMed publication types, or the title for Crossref journals
+- **Classics**: landmark papers every OMFS trainee should know, each with a line on why it matters —
+  edit the list in [`src/data/classics.ts`](src/data/classics.ts) (PubMed IDs)
 - Green frosted cards = free to read · blue cards with a padlock = subscription
 - "New" badge on articles recently added to PubMed/Crossref
 - Save articles (bookmarks), export citations (Vancouver / BibTeX, `.txt`)

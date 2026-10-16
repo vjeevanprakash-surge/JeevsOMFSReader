@@ -1,4 +1,5 @@
 import { journalByIssn } from '../data/journals';
+import { detectStudyType, studyTypeQuery } from '../data/studyTypes';
 import { classify, OMFS_RELEVANCE_QUERY, topicById } from '../data/topics';
 import { limitedFetch } from './http';
 import { getSettings } from './settings';
@@ -31,6 +32,8 @@ export function buildPubmedTerm(journals: Journal[], q: ArticleQuery): string {
   if (q.author?.trim()) parts.push(`${q.author.trim()}[au]`);
   // PubMed's "free full text" subset: free on PMC or at the publisher, flagged as soon as it's indexed.
   if (q.freeOnly) parts.push(FREE_FILTER);
+  const type = q.studyType ? studyTypeQuery(q.studyType) : undefined;
+  if (type) parts.push(type);
   return parts.join(' AND ');
 }
 
@@ -49,6 +52,7 @@ export async function searchPubmed(journals: Journal[], q: ArticleQuery): Promis
   const term = buildPubmedTerm(journals, q);
   // No `sort`: PubMed's default is most recently added, which avoids future-dated issues jumping ahead.
   const p = params({ db: 'pubmed', retmode: 'json', retmax: String(PAGE_SIZE), retstart: String(q.page * PAGE_SIZE) });
+  if (q.sort === 'relevance') p.set('sort', 'relevance');
   // POST keeps long ISSN queries under URL length limits.
   p.set('term', term);
   const res = await limitedFetch(`${EUTILS}esearch.fcgi`, interval(), { method: 'POST', body: p });
@@ -153,6 +157,7 @@ export function parsePubmedXml(xml: string): Article[] {
       year: Number(pubDate.slice(0, 4)),
       keywords,
       topics: classify({ title, keywords, abstract }),
+      studyType: detectStudyType([...art.querySelectorAll('PublicationTypeList > PublicationType')].map(text), title),
       isOpenAccess: (journal?.freePct ?? 0) >= 95,
     } satisfies Article;
   });

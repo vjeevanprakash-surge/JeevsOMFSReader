@@ -154,3 +154,44 @@ describe('article routes', () => {
     expect(parseArticleId('doi:10.1/50%off')).toBe('doi:10.1/50%off'); // literal % does not throw
   });
 });
+
+describe('study types', () => {
+  it('prefers PubMed publication types, strongest first', async () => {
+    const { detectStudyType } = await import('../data/studyTypes');
+    expect(detectStudyType(['Journal Article', 'Review', 'Systematic Review', 'Meta-Analysis'], 'x')).toBe('meta');
+    expect(detectStudyType(['Journal Article', 'Randomized Controlled Trial'], 'x')).toBe('rct');
+    expect(detectStudyType(['Case Reports'], 'x')).toBe('case');
+    expect(detectStudyType(['Journal Article', 'Review'], 'x')).toBe('review');
+    expect(detectStudyType(['Journal Article', 'Review'], 'Third molar difficulty scales: systematic review')).toBe('sr');
+  });
+
+  it('falls back to the title when there are no publication types (Crossref)', async () => {
+    const { detectStudyType } = await import('../data/studyTypes');
+    expect(detectStudyType([], 'Solitary bone cysts of the anterior mandible: systematic review')).toBe('sr');
+    expect(detectStudyType([], 'A case of odontogenic keratocyst')).toBe('case');
+    expect(detectStudyType([], 'A retrospective cohort of 300 fractures')).toBe('observational');
+    expect(detectStudyType([], 'Mandibular fracture fixation')).toBeUndefined();
+  });
+
+  it('adds the study type filter to the PubMed query', () => {
+    const term = buildPubmedTerm([journalById('joms')!], { page: 0, studyType: 'rct' });
+    expect(term).toContain('"randomized controlled trial"[pt]');
+    expect(term).toMatch(/NOT \(\("meta-analysis"\[pt\]/); // stronger types excluded, matching the badge
+  });
+
+  it('reads publication types from PubMed XML', () => {
+    expect(parsePubmedXml(xml)[0].studyType).toBeUndefined(); // fixture is a "Journal Article" lab study
+  });
+});
+
+describe('classics', () => {
+  it('lists each PMID once, with a note', async () => {
+    const { CLASSICS } = await import('../data/classics');
+    const pmids = CLASSICS.flatMap((s) => s.papers.map((p) => p.pmid));
+    expect(new Set(pmids).size).toBe(pmids.length);
+    for (const s of CLASSICS) for (const p of s.papers) {
+      expect(p.pmid).toMatch(/^\d+$/);
+      expect(p.why.length).toBeGreaterThan(20);
+    }
+  });
+});

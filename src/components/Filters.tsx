@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, REGIONS } from '../data/journals';
+import { STUDY_TYPES } from '../data/studyTypes';
 import { TOPICS } from '../data/topics';
 import type { Region } from '../lib/types';
 
@@ -7,6 +8,7 @@ export interface FilterState {
   region: Region | '';
   journal: string;
   topic: string;
+  studyType: string;
   yearFrom: string;
   yearTo: string;
   /** On by default: postgraduates should land on articles they can actually read. */
@@ -29,7 +31,7 @@ export default function Filters({ value, onChange }: { value: FilterState; onCha
       row.scrollTo({ left: chip.offsetLeft - row.clientWidth / 2 + chip.offsetWidth / 2 });
     }
   }, [value.region, open]);
-  const active = [value.region, value.journal, value.topic, value.yearFrom, value.yearTo].filter(Boolean).length;
+  const active = [value.region, value.journal, value.topic, value.studyType, value.yearFrom, value.yearTo].filter(Boolean).length;
   const journals = JOURNALS.filter((j) => !value.region || j.region === value.region).sort(byFreeAccess);
 
   return (
@@ -57,7 +59,7 @@ export default function Filters({ value, onChange }: { value: FilterState; onCha
           <button
             type="button"
             className="filters-clear"
-            onClick={() => onChange({ ...value, region: '', journal: '', topic: '', yearFrom: '', yearTo: '' })}
+            onClick={() => onChange({ ...value, region: '', journal: '', topic: '', studyType: '', yearFrom: '', yearTo: '' })}
           >
             Clear
           </button>
@@ -111,6 +113,17 @@ export default function Filters({ value, onChange }: { value: FilterState; onCha
             </select>
           </label>
           <label>
+            Study type
+            <select value={value.studyType} onChange={(e) => set({ studyType: e.target.value })}>
+              <option value="">All study types</option>
+              {STUDY_TYPES.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
             From
             <select value={value.yearFrom} onChange={(e) => set({ yearFrom: e.target.value })}>
               <option value="">Any</option>
@@ -140,6 +153,7 @@ export function filtersFromParams(p: URLSearchParams): FilterState {
     region: (p.get('region') ?? '') as Region | '',
     journal: p.get('journal') ?? '',
     topic: p.get('topic') ?? '',
+    studyType: p.get('type') ?? '',
     yearFrom: p.get('from') ?? '',
     yearTo: p.get('to') ?? '',
     freeOnly: p.get('all') !== '1',
@@ -148,7 +162,7 @@ export function filtersFromParams(p: URLSearchParams): FilterState {
 
 export function filtersToParams(f: FilterState, extra: Record<string, string> = {}) {
   const entries = {
-    region: f.region, journal: f.journal, topic: f.topic, from: f.yearFrom, to: f.yearTo,
+    region: f.region, journal: f.journal, topic: f.topic, type: f.studyType, from: f.yearFrom, to: f.yearTo,
     all: f.freeOnly ? '' : '1',
     ...extra,
   };
@@ -160,6 +174,7 @@ export function filtersToQuery(f: FilterState) {
     regions: f.region ? [f.region] : undefined,
     journalIds: f.journal ? [f.journal] : undefined,
     topic: f.topic || undefined,
+    studyType: f.studyType || undefined,
     yearFrom: f.yearFrom ? Number(f.yearFrom) : undefined,
     yearTo: f.yearTo ? Number(f.yearTo) : undefined,
     freeOnly: f.freeOnly || undefined,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { formatDate } from '../components/ArticleCard';
 import BookmarkButton from '../components/BookmarkButton';
+import StudyBadge from '../components/StudyBadge';
 import { journalById } from '../data/journals';
 import { downloadText, toBibtex, toVancouver } from '../lib/citation';
 import { cacheArticles, deletePdf, getArticle, getPdf } from '../lib/db';
@@ -68,6 +69,7 @@ export default function ArticlePage() {
           <span className={`access ${a.isOpenAccess ? 'access-free' : 'access-paid'}`}>
             {a.isOpenAccess ? 'Open access' : '🔒 Subscription'}
           </span>
+          <StudyBadge type={a.studyType} />
           {isNew(a) && <span className="badge-new">New</span>}
           <BookmarkButton id={a.id} withLabel />
         </div>

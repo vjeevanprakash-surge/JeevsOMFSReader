@@ -29,7 +29,16 @@ export async function runQuery(q: ArticleQuery): Promise<QueryResult> {
     errors.push(`Europe PMC (open-access status): ${(e as Error).message}`);
   }
 
-  const merged = [...pubmedArticles, ...cr.articles].sort((a, b) => b.addedDate.localeCompare(a.addedDate));
+  // Newest: one timeline. Relevance: each source is already ranked, so interleave them by rank position.
+  const merged =
+    q.sort === 'relevance'
+      ? [
+          ...pubmedArticles.map((a, i) => ({ a, k: i / pubmedArticles.length })),
+          ...cr.articles.map((a, i) => ({ a, k: i / cr.articles.length })),
+        ]
+          .sort((x, y) => x.k - y.k)
+          .map((x) => x.a)
+      : [...pubmedArticles, ...cr.articles].sort((a, b) => b.addedDate.localeCompare(a.addedDate));
   const articles = await cacheArticles(merged).catch(() => merged);
   const hasMore = (q.page + 1) * PAGE_SIZE < pm.total || (q.page + 1) * crossrefRows < cr.total;
   const total = pm.total + cr.total;
