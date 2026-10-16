@@ -77,7 +77,7 @@ function Shell() {
           <img className="brand-logo" src={`${import.meta.env.BASE_URL}favicon.svg`} width={36} height={36} alt="" />
           <span className="brand-text">
             <span className="brand-name">
-              OMFS <span>Reader</span>
+              <span className="brand-owner">Jeevs</span> OMFS <span>Reader</span>
             </span>
             <span className="brand-tag">{TAGLINE}</span>
           </span>

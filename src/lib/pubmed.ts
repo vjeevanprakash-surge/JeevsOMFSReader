@@ -36,7 +36,7 @@ export function buildPubmedTerm(journals: Journal[], q: ArticleQuery): string {
 
 function params(extra: Record<string, string>) {
   const s = getSettings();
-  const p = new URLSearchParams({ tool: 'OMFSReader', ...extra });
+  const p = new URLSearchParams({ tool: 'JeevsOMFSReader', ...extra });
   if (s.ncbiApiKey) p.set('api_key', s.ncbiApiKey);
   if (s.contactEmail) p.set('email', s.contactEmail);
   return p;

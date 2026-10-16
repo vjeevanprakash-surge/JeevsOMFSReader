@@ -35,8 +35,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
-        name: 'OMFS Reader',
-        short_name: 'OMFS Reader',
+        name: 'Jeevs OMFS Reader',
+        // Label under the home-screen icon: phones cut these off at about 12 characters.
+        short_name: 'Jeevs OMFS',
         description: 'Rekindling the reading habit, one paper at a time. Free OMFS research from PubMed, Europe PMC and Crossref.',
         id: './',
         scope: './',

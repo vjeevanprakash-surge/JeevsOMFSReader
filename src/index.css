@@ -1,5 +1,5 @@
 /* ==========================================================================
-   OMFS Reader — design tokens
+   Jeevs OMFS Reader — design tokens
    Breakpoints: phone < 720px · tablet 720–1099px · desktop ≥ 1100px
    ========================================================================== */
 :root {
@@ -148,6 +148,7 @@ button, input, select { font: inherit; color: inherit; }
 .brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
 .brand-name { font-family: var(--font-display); font-weight: 800; font-size: 1.14rem; letter-spacing: -0.02em; white-space: nowrap; }
 .brand-name span { font-weight: 500; }
+.brand-name .brand-owner { font-weight: 800; color: var(--free); }
 .brand-tag { font-size: 0.75rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Tagline only where there is room beside the nav. */
 @media (min-width: 720px) and (max-width: 1099px) { .brand-tag { display: none; } }

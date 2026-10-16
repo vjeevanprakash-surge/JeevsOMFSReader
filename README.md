@@ -1,4 +1,4 @@
-# JeevsOMFSReader
+# Jeevs OMFS Reader
 
 *Rekindling the reading habit, one paper at a time.*
 
