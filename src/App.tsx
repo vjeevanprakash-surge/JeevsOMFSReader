@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { HashRouter, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { HashRouter, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import FloatingSearch from './components/FloatingSearch';
+import { SEARCH_SHORTCUT } from './lib/recent';
 import ArticlePage from './pages/ArticlePage';
 import BrowsePage from './pages/BrowsePage';
 import SavedPage from './pages/SavedPage';
@@ -31,9 +33,31 @@ function useOnline() {
   return online;
 }
 
+/** Pages that get the floating search bar on phones (not articles, so it never covers reading). */
+const FLOATING_SEARCH_ON = ['/', '/saved', '/stats'];
+
+/** Ctrl+K / ⌘K: focus the search box, opening the Search page if needed. */
+function useSearchShortcut() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== 'k') return;
+      e.preventDefault();
+      const input = document.querySelector<HTMLInputElement>('form.search input[type="search"]');
+      if (input) {
+        input.focus();
+        input.select();
+      } else navigate('/search', { state: { focus: true } });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [navigate]);
+}
+
 function Shell() {
   const online = useOnline();
   const { pathname } = useLocation();
+  useSearchShortcut();
   // Braces matter: newer browsers' scrollTo returns a Promise, which React would treat as a cleanup.
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -62,7 +86,14 @@ function Shell() {
       {/* Outside the header: a blurred (backdrop-filter) header would trap a fixed bottom bar. */}
       <nav className="nav glass" aria-label="Main">
         {NAV.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.to === '/'}>
+          <NavLink
+            key={n.to}
+            to={n.to}
+            end={n.to === '/'}
+            // On phones search lives in the floating bar instead of the tab bar (see CSS).
+            className={n.to === '/search' ? 'nav-search' : undefined}
+            title={n.to === '/search' ? `Search (${SEARCH_SHORTCUT})` : undefined}
+          >
             <span className="nav-icon" aria-hidden>
               {n.icon}
             </span>
@@ -92,6 +123,7 @@ function Shell() {
           </Routes>
         </div>
       </main>
+      {FLOATING_SEARCH_ON.includes(pathname) && <FloatingSearch />}
     </>
   );
 }

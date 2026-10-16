@@ -41,6 +41,7 @@
   --maxw: 1600px;
   --gutter: clamp(16px, 3vw, 40px);
   --header-h: 60px;
+  --tabbar-h: 64px;
 
   /* Type: Clarity City (Google Fonts, OFL) throughout; self-hosted so it works offline. */
   --font-display: 'Clarity City Variable', 'Segoe UI', system-ui, sans-serif;
@@ -177,13 +178,15 @@ button, input, select { font: inherit; color: inherit; }
 /* Phone: glass tab bar at the bottom. */
 @media (max-width: 719px) {
   .nav {
-    top: auto; bottom: 0; left: 0; right: 0; height: auto; justify-content: space-around;
+    top: auto; bottom: 0; left: 0; right: 0; justify-content: space-around;
+    /* Fixed height so the floating search bar can sit a known distance above it. */
+    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); box-sizing: border-box;
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
     background: var(--glass-strong); border-top: 1px solid var(--glass-edge);
     -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
     box-shadow: 0 -6px 24px rgba(13, 34, 53, 0.08);
   }
-  .nav a { flex: 1; flex-direction: column; gap: 2px; min-height: 52px; padding: 6px 4px; font-size: 0.75rem; justify-content: center; }
+  .nav a { flex: 1; flex-direction: column; gap: 2px; min-height: 0; height: 100%; padding: 4px; font-size: 0.75rem; justify-content: center; }
   .nav-icon { font-size: 1.25rem; }
   .nav a.active .nav-icon { transform: translateY(-2px) scale(1.15); }
 }
@@ -532,3 +535,45 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
   .install-actions .btn { flex: 1; justify-content: center; }
   .install-close { position: absolute; top: 4px; right: 4px; }
 }
+
+/* ==========================================================================
+   Floating search (phones) and recent searches
+   ========================================================================== */
+.fsearch { display: none; }
+@media (max-width: 719px) {
+  /* Search moves out of the tab bar into the floating bar. */
+  .nav a.nav-search { display: none; }
+  .main { padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
+
+  .fsearch {
+    display: flex; flex-direction: column; gap: 8px;
+    position: fixed; z-index: 22; left: 12px; right: 12px;
+    bottom: calc(var(--tabbar-h) + 10px + env(safe-area-inset-bottom));
+    animation: fsearch-in 0.45s var(--spring) backwards 0.15s;
+    transition: bottom 0.2s var(--ease);
+  }
+  .fsearch-bar {
+    display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 6px 0 16px;
+    border-radius: 26px; background: var(--glass-strong); color: var(--ink-2);
+    box-shadow: var(--glass-hi), var(--shadow-lift);
+    transition: box-shadow 0.25s var(--ease), border-color 0.2s;
+  }
+  .fsearch.is-focused .fsearch-bar { border-color: var(--brand-2); box-shadow: var(--glass-hi), var(--shadow-lift), 0 0 0 3px color-mix(in srgb, var(--brand-2) 22%, transparent); }
+  .fsearch-bar input[type='search'] {
+    flex: 1; min-width: 0; min-height: 0; height: 100%; padding: 0; border: 0; background: none; box-shadow: none;
+    font-size: 16px; /* 16px stops iPhones zooming the page when the box is tapped */
+    color: var(--ink);
+  }
+  .fsearch-bar input[type='search']:focus { box-shadow: none; }
+  .fsearch-bar input::-webkit-search-cancel-button { display: none; }
+  .fsearch-clear { width: 40px; height: 40px; border: 0; border-radius: 20px; background: none; color: var(--ink-2); font-size: 1.4rem; cursor: pointer; }
+  .fsearch-recent { border-radius: 18px; padding: 10px 12px; background: var(--glass-strong); animation: drop-in 0.25s var(--ease); }
+  .fsearch-recent .recent { margin: 0; }
+}
+@keyframes fsearch-in { from { opacity: 0; transform: translateY(16px) scale(0.97); } }
+
+.recent { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 4px 0 8px; }
+.recent-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); margin-right: 2px; }
+.recent-chip { min-height: 36px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recent-kind { font-size: 0.72rem; font-weight: 700; color: var(--brand-2); margin-right: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.recent-clear { margin-left: auto; min-height: 36px; border: 0; background: none; color: var(--brand-2); font-weight: 600; cursor: pointer; padding: 0 6px; }
