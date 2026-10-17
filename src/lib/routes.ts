@@ -4,8 +4,10 @@
  * hash (some, e.g. iPhone browsers, have; an encoded `%2F` that gets decoded used to break the route).
  * Only characters that would end the path (`?`, `#`, `%`, spaces…) are encoded.
  */
-export const articlePath = (id: string) =>
-  `/article/${encodeURIComponent(id).replace(/%2F/gi, '/').replace(/%3A/gi, ':')}`;
+const encodeId = (id: string) => encodeURIComponent(id).replace(/%2F/gi, '/').replace(/%3A/gi, ':');
+export const articlePath = (id: string) => `/article/${encodeId(id)}`;
+/** The in-app reader for an article's full text: `/read/pmid:123`. */
+export const readerPath = (id: string) => `/read/${encodeId(id)}`;
 
 /** Recovers the article id from the splat, tolerating already-decoded or malformed input. */
 export function parseArticleId(raw: string | undefined): string {

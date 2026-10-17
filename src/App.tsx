@@ -5,6 +5,7 @@ import { SEARCH_SHORTCUT } from './lib/recent';
 import ArticlePage from './pages/ArticlePage';
 import BrowsePage from './pages/BrowsePage';
 import ClassicsPage from './pages/ClassicsPage';
+import ReaderPage from './pages/ReaderPage';
 import SavedPage from './pages/SavedPage';
 import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
@@ -111,6 +112,7 @@ function Shell() {
             <Route path="/" element={<BrowsePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/article/*" element={<ArticlePage />} />
+            <Route path="/read/*" element={<ReaderPage />} />
             <Route path="/classics" element={<ClassicsPage />} />
             <Route path="/saved" element={<SavedPage />} />
             <Route path="/stats" element={<StatsPage />} />

@@ -5,23 +5,11 @@ import BookmarkButton from '../components/BookmarkButton';
 import StudyBadge from '../components/StudyBadge';
 import { journalById } from '../data/journals';
 import { downloadText, toBibtex, toVancouver } from '../lib/citation';
-import { cacheArticles, deletePdf, getArticle, getPdf } from '../lib/db';
-import { enrichOpenAccess } from '../lib/europepmc';
+import { canReadInApp, loadArticle } from '../lib/article';
+import { deletePdf, getPdf } from '../lib/db';
 import { canCachePdf, downloadPdf, isNew, openCachedPdf } from '../lib/pdf';
-import { fetchCrossrefWork } from '../lib/crossref';
-import { fetchPubmed } from '../lib/pubmed';
-import { parseArticleId } from '../lib/routes';
+import { parseArticleId, readerPath } from '../lib/routes';
 import type { Article } from '../lib/types';
-
-/** From device storage, else fetched again (a shared link, or storage unavailable). */
-async function loadArticle(id: string): Promise<Article | undefined> {
-  const cached = await getArticle(id).catch(() => undefined);
-  if (cached) return cached;
-  let fetched: Article[] = [];
-  if (id.startsWith('pmid:')) fetched = await enrichOpenAccess(await fetchPubmed([id.slice(5)]));
-  else if (id.startsWith('doi:')) fetched = [await fetchCrossrefWork(id.slice(4))].filter((x): x is Article => !!x);
-  return (await cacheArticles(fetched).catch(() => fetched))[0];
-}
 
 export default function ArticlePage() {
   const id = parseArticleId(useParams()['*']);
@@ -94,6 +82,11 @@ export default function ArticlePage() {
       </div>
 
       <div className="actions">
+        {canReadInApp(a) && (
+          <Link className="btn btn-free btn-read" to={readerPath(a.id)} state={{ article: a }}>
+            📖 Read in app
+          </Link>
+        )}
         {(hasPdf || canCachePdf(a)) &&
           (hasPdf ? (
             <>
@@ -112,7 +105,7 @@ export default function ArticlePage() {
               </button>
             </>
           ) : (
-            <button type="button" className="btn btn-free" onClick={savePdf} disabled={pdfState === 'busy'}>
+            <button type="button" className={`btn ${canReadInApp(a) ? 'btn-free-outline' : 'btn-free'}`} onClick={savePdf} disabled={pdfState === 'busy'}>
               {pdfState === 'busy' ? 'Downloading…' : '⤓ Save PDF offline'}
             </button>
           ))}

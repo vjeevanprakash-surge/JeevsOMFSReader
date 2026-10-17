@@ -4,12 +4,12 @@ import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { handlePdfRequest } from './proxy/pdfProxy.ts'
 
-/** Serves the PDF proxy at /pdf/PMCxxxx during `npm run dev` and `npm run preview`. */
+/** Serves the proxy (/pdf/PMCxxxx, /file/PMCxxxx/name) during `npm run dev` and `npm run preview`. */
 function pdfProxy(): Plugin {
   const middleware = async (req: { url?: string }, res: import('node:http').ServerResponse, next: () => void) => {
-    if (!req.url?.startsWith('/pdf/')) return next()
+    if (!/^\/(pdf|file)\//.test(req.url ?? '')) return next()
     try {
-      const r = await handlePdfRequest(new URL(req.url, 'http://x').pathname)
+      const r = await handlePdfRequest(new URL(req.url ?? '/', 'http://x').pathname)
       res.statusCode = r.status
       r.headers.forEach((v, k) => res.setHeader(k, v))
       res.end(Buffer.from(await r.arrayBuffer()))
@@ -58,6 +58,16 @@ export default defineConfig({
         // App shell plus the Latin font files, so the installed app looks the same offline.
         globPatterns: ['**/*.{js,css,html,svg,png,ico}', 'assets/*-latin-*.woff2', 'assets/*-latin-ext-*.woff2'],
         runtimeCaching: [
+          {
+            // Figure images in the reader: kept once seen, so opened papers read well offline.
+            urlPattern: /^https:\/\/omfs-pdf-proxy\.[\w-]+\.workers\.dev\/file\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'figures',
+              expiration: { maxEntries: 600, maxAgeSeconds: 90 * 86400 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
           {
             // API responses: fresh when online, cached copy when offline.
             urlPattern: /^https:\/\/(eutils\.ncbi\.nlm\.nih\.gov|www\.ebi\.ac\.uk|api\.crossref\.org)\//,

@@ -8,7 +8,7 @@ export const DEFAULT_PDF_PROXY = 'https://omfs-pdf-proxy.jeevs-omfs.workers.dev'
 const isLocal = () => ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 
 /** Proxy base URL: Settings override, else the dev/preview server's built-in one locally, else the Worker. */
-const pdfProxyBase = () => (getSettings().pdfProxyUrl || (isLocal() ? '' : DEFAULT_PDF_PROXY)).replace(/\/$/, '');
+export const proxyBase = () => (getSettings().pdfProxyUrl || (isLocal() ? '' : DEFAULT_PDF_PROXY)).replace(/\/$/, '');
 
 /** True when the PDF can be downloaded for offline use (open access with a PMC copy). */
 export const canCachePdf = (a: Article) => a.isOpenAccess && !!a.pmcid;
@@ -18,7 +18,7 @@ export const canCachePdf = (a: Article) => a.isOpenAccess && !!a.pmcid;
  * and stores it in IndexedDB.
  */
 export async function downloadPdf(a: Article): Promise<Blob> {
-  const res = await fetch(`${pdfProxyBase()}/pdf/${a.pmcid}`);
+  const res = await fetch(`${proxyBase()}/pdf/${a.pmcid}`);
   if (!res.ok) throw new Error(res.status === 404 ? 'No PDF in the PMC open-access set' : `PDF proxy responded ${res.status}`);
   const blob = await res.blob();
   if (!blob.type.includes('pdf')) throw new Error('PDF proxy did not return a PDF');

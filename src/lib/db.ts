@@ -1,4 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import type { FullText } from './fulltext';
 import type { Article } from './types';
 
 interface OmfsDB extends DBSchema {
@@ -7,11 +8,13 @@ interface OmfsDB extends DBSchema {
   pdfs: { key: string; value: { id: string; blob: Blob; savedAt: number } };
   /** Last result of each query, so repeat visits (and offline use) show results instantly. */
   queries: { key: string; value: { key: string; ids: string[]; total: number; hasMore: boolean; at: number } };
+  /** Full text opened in the reader, kept for offline reading. */
+  fulltext: { key: string; value: { id: string; doc: FullText; savedAt: number } };
 }
 
 let dbp: Promise<IDBPDatabase<OmfsDB>> | undefined;
 const db = () =>
-  (dbp ??= openDB<OmfsDB>('omfs-reader', 2, {
+  (dbp ??= openDB<OmfsDB>('omfs-reader', 3, {
     upgrade(d, oldVersion) {
       if (oldVersion < 1) {
         d.createObjectStore('articles', { keyPath: 'id' });
@@ -19,6 +22,7 @@ const db = () =>
         d.createObjectStore('pdfs', { keyPath: 'id' });
       }
       if (oldVersion < 2) d.createObjectStore('queries', { keyPath: 'key' });
+      if (oldVersion < 3) d.createObjectStore('fulltext', { keyPath: 'id' });
     },
   }));
 
@@ -56,6 +60,10 @@ export const getPdf = async (id: string) => (await db()).get('pdfs', id);
 export const savePdf = async (id: string, blob: Blob) => (await db()).put('pdfs', { id, blob, savedAt: Date.now() });
 export const deletePdf = async (id: string) => (await db()).delete('pdfs', id);
 export const pdfIds = async () => (await db()).getAllKeys('pdfs');
+
+export const getFullTextDoc = async (id: string) => (await db()).get('fulltext', id);
+export const saveFullTextDoc = async (id: string, doc: FullText) => (await db()).put('fulltext', { id, doc, savedAt: Date.now() });
+export const fullTextIds = async () => (await db()).getAllKeys('fulltext');
 
 export async function saveQueryResult(key: string, ids: string[], total: number, hasMore: boolean) {
   await (await db()).put('queries', { key, ids, total, hasMore, at: Date.now() });

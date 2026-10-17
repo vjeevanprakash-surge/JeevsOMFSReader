@@ -195,3 +195,58 @@ describe('classics', () => {
     }
   });
 });
+
+describe('parseFullText', async () => {
+  const { parseFullText, inlineText } = await import('./fulltext');
+  const jats = `<?xml version="1.0"?>
+<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML">
+  <front><article-meta>
+    <abstract abstract-type="graphical"><p>Graphical</p></abstract>
+    <abstract><sec><title>Background</title><p>Why it matters.</p></sec></abstract>
+  </article-meta></front>
+  <body>
+    <sec id="s1"><title>Methods</title>
+      <p>We fixed <italic>mandibular</italic> fractures <xref ref-type="bibr" rid="CR1">1</xref> (see <xref ref-type="fig" rid="F1">Fig. 1</xref>).
+        <fig id="F1"><label>Fig. 1</label><caption><p>A plate.</p></caption><graphic xlink:href="fig1"/></fig>
+        Then we waited.</p>
+      <sec><title>Statistics</title><p>p <inline-formula><mml:math><mml:mo>&lt;</mml:mo><mml:mn>0.05</mml:mn></mml:math></inline-formula></p>
+        <table-wrap id="T1"><label>Table 1</label><table><thead><tr><th>Group</th><th colspan="2">n</th></tr></thead><tbody><tr><td>A</td><td>10</td><td>12</td></tr></tbody></table></table-wrap>
+      </sec>
+    </sec>
+  </body>
+  <back>
+    <ack><p>Thanks.</p></ack>
+    <ref-list><ref id="CR1"><label>1</label><element-citation><person-group><name><surname>Champy</surname><given-names>M</given-names></name></person-group><article-title>Mandibular osteosynthesis.</article-title><source>J Maxillofac Surg</source><year>1978</year><volume>6</volume><fpage>14</fpage><lpage>21</lpage><pub-id pub-id-type="pmid">274501</pub-id></element-citation></ref></ref-list>
+  </back>
+</article>`;
+  const doc = parseFullText(jats, 'PMC1');
+
+  it('keeps the main abstract, body sections and acknowledgements in order', () => {
+    expect(doc.sections.map((s) => s.title)).toEqual(['Abstract', 'Methods', 'Acknowledgements']);
+    expect(doc.sections[0].children[0].title).toBe('Background');
+    expect(doc.sections[1].children[0].title).toBe('Statistics');
+  });
+
+  it('splits a paragraph around a figure nested in it', () => {
+    const blocks = doc.sections[1].blocks;
+    expect(blocks.map((b) => b.t)).toEqual(['p', 'fig', 'p']);
+    const p = blocks[0];
+    expect(p.t === 'p' && inlineText(p.c)).toBe('We fixed mandibular fractures 1 (see Fig. 1).');
+    expect(p.t === 'p' && p.c.some((x) => typeof x !== 'string' && x.t === 'xref' && x.rid === 'CR1' && x.kind === 'bibr')).toBe(true);
+    const fig = blocks[1];
+    expect(fig.t === 'fig' && fig.label).toBe('Fig. 1');
+    expect(fig.t === 'fig' && fig.src).toMatch(/\/file\/PMC1\/fig1$/);
+  });
+
+  it('reads formulas as text and tables as rows with spans', () => {
+    const [p, table] = doc.sections[1].children[0].blocks;
+    expect(p.t === 'p' && inlineText(p.c)).toBe('p <0.05');
+    expect(table.t === 'table' && table.rows.length).toBe(2);
+    expect(table.t === 'table' && table.rows[0][1]).toMatchObject({ head: true, colSpan: 2 });
+  });
+
+  it('formats element-citation references with their PubMed id', () => {
+    expect(doc.references[0]).toMatchObject({ id: 'CR1', label: '1', pmid: '274501' });
+    expect(doc.references[0].text).toBe('Champy M. Mandibular osteosynthesis. J Maxillofac Surg. 1978;6:14–21.');
+  });
+});
