@@ -3,6 +3,19 @@ import { cachedQuery, runQuery } from '../lib/query';
 import type { Article, ArticleQuery } from '../lib/types';
 import ArticleCard from './ArticleCard';
 
+// What browsers say when a request never reaches the server (no signal, blocked network…).
+const NETWORK_FAILURE = /failed to fetch|load failed|networkerror|network request failed/i;
+
+/** Plain-language summary of why sources failed. */
+function describeErrors(errors: string[], stale: boolean): string {
+  const saved = stale ? ' Showing the results saved on this device.' : '';
+  if (!navigator.onLine) return `You're offline.${saved} New articles will load when you're back online.`;
+  if (errors.every((e) => NETWORK_FAILURE.test(e))) {
+    return `Couldn't reach the journal databases. Check your internet connection (some hospital and college Wi-Fi networks block them) and try again.${saved}`;
+  }
+  return `Some sources didn't respond: ${errors.map((e) => e.replace(NETWORK_FAILURE, 'no connection')).join(' · ')}.${saved}`;
+}
+
 /**
  * Runs a query and lists results with "Load more". Each page shows its last cached result at once
  * (if any) and is replaced when fresh results arrive. Resets to page 0 when the query changes.
@@ -63,6 +76,14 @@ export default function ArticleList({ query }: { query: Omit<ArticleQuery, 'page
     };
   }, [req]);
 
+  // Try again by itself when the connection comes back.
+  const retry = () => setReq((r) => ({ ...r }));
+  useEffect(() => {
+    if (!errors.length) return;
+    window.addEventListener('online', retry);
+    return () => window.removeEventListener('online', retry);
+  }, [errors.length]);
+
   // A later page can repeat an article from an earlier one when new articles arrive in between.
   const seen = new Set<string>();
   const articles = pages.flat().filter((a) => !seen.has(a.id) && seen.add(a.id));
@@ -76,7 +97,12 @@ export default function ArticleList({ query }: { query: Omit<ArticleQuery, 'page
       </p>
       {errors.length > 0 && (
         <div className="errors" role="status">
-          {stale ? 'Showing saved results. ' : ''}Some sources didn't respond: {errors.join(' · ')}
+          <span>{describeErrors(errors, stale)}</span>
+          {!loading && (
+            <button type="button" className="btn btn-retry" onClick={retry}>
+              Try again
+            </button>
+          )}
         </div>
       )}
       <div className="grid">
