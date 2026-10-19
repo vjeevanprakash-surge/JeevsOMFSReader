@@ -715,3 +715,14 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
 @media (prefers-reduced-motion: reduce) {
   .sheet, .sheet-backdrop, .skeleton-line { animation: none; }
 }
+
+/* New-version notice: a pill under the header. */
+.update-notice {
+  position: fixed; z-index: 30; left: 50%; top: calc(var(--header-h) + 10px); transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 16px; border-radius: 999px;
+  font-size: 0.9rem; font-weight: 600; white-space: nowrap; box-shadow: var(--shadow-lift);
+  animation: notice-in 0.45s var(--spring);
+}
+.update-notice .btn { min-height: 34px; padding: 6px 14px; border-radius: 999px; }
+@keyframes notice-in { from { opacity: 0; transform: translate(-50%, -12px); } }
+@media (prefers-reduced-motion: reduce) { .update-notice { animation: none; } }

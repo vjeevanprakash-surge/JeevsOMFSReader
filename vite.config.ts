@@ -33,6 +33,8 @@ export default defineConfig({
     pdfProxy(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registered by src/lib/update.ts, which also decides when the page switches to a new version.
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
         name: 'Jeevs OMFS Reader',
@@ -55,6 +57,9 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: 'index.html',
+        // A new version takes over at once; src/lib/update.ts picks the moment the page switches to it.
+        skipWaiting: true,
+        clientsClaim: true,
         // App shell plus the Latin font files, so the installed app looks the same offline.
         globPatterns: ['**/*.{js,css,html,svg,png,ico}', 'assets/*-latin-*.woff2', 'assets/*-latin-ext-*.woff2'],
         runtimeCaching: [

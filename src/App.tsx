@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { HashRouter, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import FloatingSearch from './components/FloatingSearch';
 import { SEARCH_SHORTCUT } from './lib/recent';
+import { applyUpdate, onNavigate, onUpdatePending, updatePending } from './lib/update';
 import ArticlePage from './pages/ArticlePage';
 import BrowsePage from './pages/BrowsePage';
 import ClassicsPage from './pages/ClassicsPage';
@@ -57,6 +58,21 @@ function useSearchShortcut() {
   }, [navigate]);
 }
 
+/** A small notice when a new version is ready (it is also applied on the next page change). */
+function UpdateNotice() {
+  const [ready, setReady] = useState(updatePending);
+  useEffect(() => onUpdatePending(() => setReady(true)), []);
+  if (!ready) return null;
+  return (
+    <div className="update-notice glass" role="status">
+      <span>✨ New features are ready</span>
+      <button type="button" className="btn btn-primary" onClick={applyUpdate}>
+        Update
+      </button>
+    </div>
+  );
+}
+
 function Shell() {
   const online = useOnline();
   const { pathname } = useLocation();
@@ -64,6 +80,7 @@ function Shell() {
   // Braces matter: newer browsers' scrollTo returns a Promise, which React would treat as a cleanup.
   useEffect(() => {
     window.scrollTo(0, 0);
+    onNavigate();
   }, [pathname]);
 
   return (
@@ -104,6 +121,7 @@ function Shell() {
           </NavLink>
         ))}
       </nav>
+      <UpdateNotice />
       {!online && <div className="offline">You're offline — showing saved and cached articles.</div>}
       <main className="main">
         {/* Keyed by route so each page fades in. */}
