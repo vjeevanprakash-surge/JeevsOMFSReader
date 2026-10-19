@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { journalById, REGIONS } from '../data/journals';
+import { journalById, REGIONS, specialtyOf } from '../data/journals';
+import { SPECIALTIES } from '../data/specialties';
 import { STUDY_TYPES } from '../data/studyTypes';
 import { OTHER_TOPIC, TOPICS } from '../data/topics';
 import { allArticles, bookmarkedArticles, pdfIds } from '../lib/db';
@@ -48,6 +49,7 @@ export default function StatsPage() {
   if (!data) return <p className="empty">Loading…</p>;
   const items = scope === 'all' ? data.all : data.saved;
   const oa = items.filter((a) => a.isOpenAccess).length;
+  const specialties = count(items.map((a) => { const j = journalById(a.journalId); return j ? specialtyOf(j) : 'omfs'; }));
   const regions = count(items.map((a) => journalById(a.journalId)?.region ?? 'Other'));
   const topics = count(items.flatMap((a) => a.topics));
   const types = count(items.map((a) => a.studyType ?? 'other'));
@@ -86,6 +88,7 @@ export default function StatsPage() {
         </div>
       </div>
       <div className="panels">
+        <Bars title="By specialty" rows={SPECIALTIES.filter((s) => specialties.has(s.id)).map((s) => [s.label, specialties.get(s.id)!])} />
         <Bars title="By region" rows={REGIONS.filter((r) => regions.has(r)).map((r) => [r, regions.get(r)!])} />
         <Bars
           title="By topic"

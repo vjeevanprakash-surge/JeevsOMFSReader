@@ -12,6 +12,9 @@ export type Region =
   | 'Latin America'
   | 'Middle East';
 
+/** Journal groupings (data/specialties.ts). */
+export type SpecialtyId = 'omfs' | 'headneck' | 'facial' | 'evidence';
+
 export interface Journal {
   id: string;
   name: string;
@@ -21,7 +24,9 @@ export interface Journal {
   issns: string[];
   /** Where articles come from. Crossref is used for journals with no PubMed records. */
   source: 'pubmed' | 'crossref';
-  /** Publishes a lot outside OMFS: results are AND-ed with an OMFS relevance filter. */
+  /** Home specialty; default OMFS. */
+  specialty?: SpecialtyId;
+  /** Publishes a lot outside its specialty: results are AND-ed with that specialty's relevance filter. */
   broad?: boolean;
   /** % of the journal's 2025 articles that are free to read (see journals.ts). ≥ 95 = every article free. */
   freePct: number;
@@ -65,6 +70,8 @@ export interface Article {
 }
 
 export interface ArticleQuery {
+  /** Specialty view; default OMFS. 'all' = every journal. Ignored when journals are named. */
+  specialty?: SpecialtyId | 'all';
   regions?: Region[];
   journalIds?: string[];
   topic?: string;

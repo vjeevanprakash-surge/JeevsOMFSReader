@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, REGIONS } from '../data/journals';
+import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, REGIONS, specialtyOf } from '../data/journals';
+import { DEFAULT_SPECIALTY, SPECIALTIES } from '../data/specialties';
 import { STUDY_TYPES } from '../data/studyTypes';
 import { TOPICS } from '../data/topics';
-import type { Region } from '../lib/types';
+import type { Region, SpecialtyId } from '../lib/types';
 
 export interface FilterState {
+  /** Specialty view: OMFS unless chosen otherwise. */
+  specialty: SpecialtyId | 'all';
   region: Region | '';
   journal: string;
   topic: string;
@@ -32,7 +35,9 @@ export default function Filters({ value, onChange }: { value: FilterState; onCha
     }
   }, [value.region, open]);
   const active = [value.region, value.journal, value.topic, value.studyType, value.yearFrom, value.yearTo].filter(Boolean).length;
-  const journals = JOURNALS.filter((j) => !value.region || j.region === value.region).sort(byFreeAccess);
+  const journals = JOURNALS.filter(
+    (j) => (!value.region || j.region === value.region) && (value.specialty === 'all' || specialtyOf(j) === value.specialty),
+  ).sort(byFreeAccess);
 
   return (
     <div className="filters">
@@ -44,6 +49,19 @@ export default function Filters({ value, onChange }: { value: FilterState; onCha
           <small>{value.freeOnly ? 'Showing articles you can open in full' : 'Including subscription articles'}</small>
         </span>
       </label>
+      <div className="specialty-chips" role="group" aria-label="Specialty">
+        {[...SPECIALTIES, { id: 'all' as const, label: 'All' }].map((sp) => (
+          <button
+            key={sp.id}
+            type="button"
+            className={`chip-btn ${value.specialty === sp.id ? 'active' : ''}`}
+            aria-pressed={value.specialty === sp.id}
+            onClick={() => set({ specialty: sp.id, journal: '' })}
+          >
+            {sp.label}
+          </button>
+        ))}
+      </div>
       <div className="filters-bar">
         <button type="button" className="filters-toggle" aria-expanded={open} aria-controls="filters-body" onClick={() => setOpen(!open)}>
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
@@ -149,7 +167,9 @@ export default function Filters({ value, onChange }: { value: FilterState; onCha
 
 /** Reads/writes filter state from URL search params so Back keeps the filters. */
 export function filtersFromParams(p: URLSearchParams): FilterState {
+  const spec = p.get('spec');
   return {
+    specialty: spec === 'all' || SPECIALTIES.some((x) => x.id === spec) ? (spec as SpecialtyId | 'all') : DEFAULT_SPECIALTY,
     region: (p.get('region') ?? '') as Region | '',
     journal: p.get('journal') ?? '',
     topic: p.get('topic') ?? '',
@@ -162,6 +182,7 @@ export function filtersFromParams(p: URLSearchParams): FilterState {
 
 export function filtersToParams(f: FilterState, extra: Record<string, string> = {}) {
   const entries = {
+    spec: f.specialty === DEFAULT_SPECIALTY ? '' : f.specialty,
     region: f.region, journal: f.journal, topic: f.topic, type: f.studyType, from: f.yearFrom, to: f.yearTo,
     all: f.freeOnly ? '' : '1',
     ...extra,
@@ -171,6 +192,7 @@ export function filtersToParams(f: FilterState, extra: Record<string, string> = 
 
 export function filtersToQuery(f: FilterState) {
   return {
+    specialty: f.specialty === DEFAULT_SPECIALTY ? undefined : f.specialty,
     regions: f.region ? [f.region] : undefined,
     journalIds: f.journal ? [f.journal] : undefined,
     topic: f.topic || undefined,

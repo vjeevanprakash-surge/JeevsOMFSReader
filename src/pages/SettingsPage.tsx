@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS } from '../data/journals';
+import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, specialtyOf } from '../data/journals';
+import { specialtyLabel } from '../data/specialties';
 import InstallBanner from '../components/InstallBanner';
 import { DEFAULT_PDF_PROXY } from '../lib/pdf';
 import { getSettings, saveSettings } from '../lib/settings';
@@ -72,7 +73,8 @@ export default function SettingsPage() {
                     <span className="muted">
                       {j.freePct}% free · {j.region} · {j.issns.join(', ')}
                       {j.source === 'crossref' && ' · via Crossref'}
-                      {j.broad && ' · OMFS-filtered'}
+                      {specialtyOf(j) !== 'omfs' && ` · ${specialtyLabel(specialtyOf(j))}`}
+                      {j.broad && ` · ${specialtyLabel(specialtyOf(j))}-filtered`}
                     </span>
                   </li>
                 ))}

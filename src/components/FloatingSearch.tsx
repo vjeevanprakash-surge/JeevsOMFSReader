@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { JOURNALS } from '../data/journals';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { DEFAULT_SPECIALTY, specialtyLabel } from '../data/specialties';
 import { addRecent, clearRecent, getRecent, searchPath, type RecentSearch } from '../lib/recent';
+import { filtersFromParams } from './Filters';
 import RecentChips from './RecentChips';
 
 /** How far the on-screen keyboard covers the page, so the bar can sit just above it. */
@@ -28,11 +29,14 @@ export default function FloatingSearch() {
   const [focused, setFocused] = useState(false);
   const [recent, setRecent] = useState<RecentSearch[]>([]);
   const keyboard = useKeyboardInset();
+  // Searches stay in the specialty being browsed.
+  const specialty = filtersFromParams(useSearchParams()[0]).specialty;
 
   const go = (r: RecentSearch) => {
     addRecent(r);
     (document.activeElement as HTMLElement | null)?.blur();
-    navigate(searchPath(r));
+    const path = searchPath(r);
+    navigate(specialty === DEFAULT_SPECIALTY ? path : `${path}&spec=${specialty}`);
   };
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -72,7 +76,7 @@ export default function FloatingSearch() {
             setFocused(true);
           }}
           onBlur={() => setFocused(false)}
-          placeholder={`Search ${JOURNALS.length} journals`}
+          placeholder={`Search ${specialty === 'all' ? 'all' : specialtyLabel(specialty)} research`}
           aria-label="Search articles"
         />
         {q && (

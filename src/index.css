@@ -257,6 +257,10 @@ button, input, select { font: inherit; color: inherit; }
 .filters-body { margin-top: 12px; }
 
 .region-chips { position: relative; display: flex; flex-wrap: wrap; gap: 7px; }
+/* Specialty: always visible (not folded away on phones), as it decides which journals are in play. */
+.specialty-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.specialty-chips .chip-btn { font-weight: 600; }
+.specialty-chips .chip-btn.active { background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
 .chip-btn {
   flex: none; min-height: 36px; padding: 6px 14px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 60%, transparent);
@@ -300,13 +304,13 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
   .filters-body:not(.open) { display: none; }
   .filters-body.open { animation: drop-in 0.28s var(--ease); }
   /* Horizontal swipe row with a fade at the edge instead of a scrollbar. */
-  .region-chips {
+  .region-chips, .specialty-chips {
     flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity;
     margin-inline: -12px; padding-inline: 12px;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 28px), transparent);
     mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 28px), transparent);
   }
-  .region-chips::-webkit-scrollbar { display: none; }
+  .region-chips::-webkit-scrollbar, .specialty-chips::-webkit-scrollbar { display: none; }
   .chip-btn { min-height: 44px; scroll-snap-align: start; }
   .filter-row { grid-template-columns: 1fr 1fr; }
   .filter-row label:nth-child(-n + 3) { grid-column: 1 / -1; }

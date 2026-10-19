@@ -250,3 +250,43 @@ describe('parseFullText', async () => {
     expect(doc.references[0].text).toBe('Champy M. Mandibular osteosynthesis. J Maxillofac Surg. 1978;6:14–21.');
   });
 });
+
+describe('specialty views', async () => {
+  const { selectJournals, JOURNALS: all } = await import('../data/journals');
+  const { HEAD_NECK_RELEVANCE_QUERY, FACIAL_RELEVANCE_QUERY } = await import('../data/specialties');
+  const ids = (q: Parameters<typeof selectJournals>[0]) => selectJournals(q).map((j) => j.id);
+
+  it('defaults to OMFS: OMFS journals plus other PubMed journals, never non-OMFS Crossref ones', () => {
+    const omfs = ids({});
+    expect(omfs).toContain('joms');
+    expect(omfs).toContain('advoms'); // OMFS, via Crossref
+    expect(omfs).toContain('sysrev'); // evidence journal, narrowed to OMFS papers
+    expect(omfs).not.toContain('par'); // facial, Crossref: can't be narrowed
+  });
+
+  it('narrows other specialties to OMFS papers in the OMFS view', () => {
+    const term = buildPubmedTerm([journalById('sysrev')!, journalById('fps')!], { page: 0 });
+    expect(term).toMatch(/\(\(2046-4053\[is\] OR 0736-6825\[is\] OR 1098-8793\[is\]\) AND \("Surgery, Oral"/);
+  });
+
+  it('shows only a specialty’s own journals, with its own relevance filter', () => {
+    const facial = selectJournals({ specialty: 'facial' });
+    expect(facial.every((j) => j.specialty === 'facial')).toBe(true);
+    expect(facial.map((j) => j.id)).toContain('par');
+    const term = buildPubmedTerm([journalById('prs')!, journalById('fps')!], { page: 0, specialty: 'facial' });
+    expect(term).toContain(`((0032-1052[is] OR 1529-4242[is]) AND ${FACIAL_RELEVANCE_QUERY})`);
+    expect(term).toContain('(0736-6825[is] OR 1098-8793[is])'); // a facial journal: taken whole
+    expect(buildPubmedTerm([journalById('johns')!], { page: 0, specialty: 'headneck' })).toContain(HEAD_NECK_RELEVANCE_QUERY);
+  });
+
+  it('takes a named journal as it is, and "all" covers every journal', () => {
+    expect(ids({ journalIds: ['par'] })).toEqual(['par']);
+    expect(ids({ specialty: 'all' })).toHaveLength(all.length);
+  });
+
+  it('has unique ids and ISSNs', () => {
+    expect(new Set(all.map((j) => j.id)).size).toBe(all.length);
+    const issns = all.flatMap((j) => j.issns);
+    expect(new Set(issns).size).toBe(issns.length);
+  });
+});

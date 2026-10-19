@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import ArticleList from '../components/ArticleList';
 import InstallBanner from '../components/InstallBanner';
 import { JOURNALS, REGIONS } from '../data/journals';
+import { SPECIALTIES, specialtyLabel } from '../data/specialties';
 import Filters, { filtersFromParams, filtersToParams, filtersToQuery } from '../components/Filters';
 
 export default function BrowsePage() {
@@ -14,9 +15,9 @@ export default function BrowsePage() {
       <div className="layout">
         <header className="page-head">
           <p className="eyebrow">
-            {JOURNALS.length} journals · {REGIONS.length} regions · updated live
+            {JOURNALS.length} journals · {SPECIALTIES.length} specialties · {REGIONS.length} regions · updated live
           </p>
-          <h1>Latest OMFS research</h1>
+          <h1>Latest {filters.specialty === 'all' ? '' : `${specialtyLabel(filters.specialty)} `}research</h1>
           <p className="lede">Free-to-read papers, newest first. Green cards open in full, no subscription needed.</p>
         </header>
         <aside className="sidebar glass" aria-label="Filters">

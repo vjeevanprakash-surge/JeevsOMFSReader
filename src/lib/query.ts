@@ -6,7 +6,7 @@ import { PAGE_SIZE, searchPubmed } from './pubmed';
 import type { ArticleQuery, QueryResult } from './types';
 
 export async function runQuery(q: ArticleQuery): Promise<QueryResult> {
-  const journals = selectJournals(q.regions, q.journalIds);
+  const journals = selectJournals(q);
   const pubmedJ = journals.filter((j) => j.source === 'pubmed');
   const crossrefJ = journals.filter((j) => j.source === 'crossref');
   const errors: string[] = [];

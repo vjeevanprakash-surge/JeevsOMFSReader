@@ -6,8 +6,9 @@ import { getSettings } from './settings';
 import type { Article, ArticleQuery, Journal } from './types';
 
 const API = 'https://api.crossref.org';
+// Some publishers register the licence URL without the trailing slash: match both.
 const CC_LICENSES = ['by', 'by-nc', 'by-nc-nd', 'by-nd', 'by-sa', 'by-nc-sa'].flatMap((v) =>
-  ['http', 'https'].map((proto) => `${proto}://creativecommons.org/licenses/${v}/4.0/`),
+  ['http', 'https'].flatMap((proto) => [`${proto}://creativecommons.org/licenses/${v}/4.0/`, `${proto}://creativecommons.org/licenses/${v}/4.0`]),
 );
 
 /** Front matter and notices Crossref registers as articles. */
@@ -73,10 +74,19 @@ export function mapCrossrefWork(w: CrossrefWork, journal: Journal): Article {
 }
 
 /**
- * One request for all Crossref-sourced journals: repeated `issn:` filters are OR-ed by Crossref.
- * (Crossref rejects parallel requests from the public pool, and its 429s carry no CORS header.)
+ * Articles from the Crossref-sourced journals. Repeated `issn:` filters are OR-ed by Crossref, so this
+ * is one request, or two when "free only" mixes fully open journals (taken whole: some register no
+ * licence) with partly free ones (Creative Commons licences only). Requests run one after another:
+ * Crossref rejects parallel requests from the public pool, and its 429s carry no CORS header.
  */
 export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows: number) {
+  const open = q.freeOnly ? journals.filter((j) => j.freePct >= 95) : journals;
+  const licensed = q.freeOnly ? journals.filter((j) => j.freePct < 95) : [];
+  const [a, b] = await Promise.all([crossrefPage(open, q, rows, false), crossrefPage(licensed, q, rows, true)]);
+  return { articles: [...a.articles, ...b.articles], total: a.total + b.total, errors: [...a.errors, ...b.errors] };
+}
+
+async function crossrefPage(journals: Journal[], q: ArticleQuery, rows: number, ccOnly: boolean) {
   if (!journals.length) return { articles: [] as Article[], total: 0, errors: [] as string[] };
   const s = getSettings();
   const filters = [
@@ -84,8 +94,8 @@ export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows:
     'type:journal-article',
     `from-pub-date:${q.yearFrom ?? 1900}`,
     `until-pub-date:${q.yearTo ?? 3000}`,
-    // Free only: Creative Commons licences (repeated license.url filters are OR-ed).
-    ...(q.freeOnly ? CC_LICENSES.map((l) => `license.url:${l}`) : []),
+    // Creative Commons licences (repeated license.url filters are OR-ed).
+    ...(ccOnly ? CC_LICENSES.map((l) => `license.url:${l}`) : []),
   ];
   const p = new URLSearchParams({
     filter: filters.join(','),

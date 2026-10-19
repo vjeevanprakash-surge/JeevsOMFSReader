@@ -3,7 +3,8 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import ArticleList from '../components/ArticleList';
 import Filters, { filtersFromParams, filtersToParams, filtersToQuery } from '../components/Filters';
 import RecentChips from '../components/RecentChips';
-import { JOURNALS } from '../data/journals';
+import { selectJournals } from '../data/journals';
+import { specialtyLabel } from '../data/specialties';
 import { addRecent, clearRecent, getRecent, SEARCH_SHORTCUT, type RecentSearch } from '../lib/recent';
 
 // Keyboard-shortcut hint only where there is a keyboard and mouse (not on phones/tablets).
@@ -105,7 +106,9 @@ export default function SearchPage() {
                 }}
               />
               <p className="empty">
-                Search titles and abstracts across all {JOURNALS.length} journals, or find an author's work.
+                Search titles and abstracts across {selectJournals(filtersToQuery(filters)).length}{' '}
+                {filters.specialty === 'all' ? '' : `${specialtyLabel(filters.specialty)} `}journals, or find an author's work.
+                Pick a specialty above to widen or narrow it.
               </p>
             </>
           )}

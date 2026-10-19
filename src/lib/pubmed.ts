@@ -1,6 +1,7 @@
 import { journalByIssn } from '../data/journals';
 import { detectStudyType, studyTypeQuery } from '../data/studyTypes';
-import { classify, OMFS_RELEVANCE_QUERY, topicById } from '../data/topics';
+import { relevanceFor, viewOf } from '../data/journals';
+import { classify, topicById } from '../data/topics';
 import { limitedFetch } from './http';
 import { getSettings } from './settings';
 import type { Article, ArticleQuery, Author, Journal } from './types';
@@ -16,13 +17,16 @@ const MONTHS: Record<string, string> = {
 
 /** Builds the PubMed search term for the given journals and filters. */
 export function buildPubmedTerm(journals: Journal[], q: ArticleQuery): string {
-  const narrow = journals.filter((j) => !j.broad).flatMap((j) => j.issns);
-  const broad = journals.filter((j) => j.broad).flatMap((j) => j.issns);
+  // Journals grouped by the relevance filter they need in this view ('' = none).
+  const view = viewOf(q);
+  const groups = new Map<string, string[]>();
+  for (const j of journals) {
+    const filter = relevanceFor(j, view) ?? '';
+    groups.set(filter, [...(groups.get(filter) ?? []), ...j.issns]);
+  }
   const issnClause = (issns: string[]) => issns.map((i) => `${i}[is]`).join(' OR ');
   const parts: string[] = [];
-  const sourceParts: string[] = [];
-  if (narrow.length) sourceParts.push(`(${issnClause(narrow)})`);
-  if (broad.length) sourceParts.push(`((${issnClause(broad)}) AND ${OMFS_RELEVANCE_QUERY})`);
+  const sourceParts = [...groups].map(([filter, issns]) => (filter ? `((${issnClause(issns)}) AND ${filter})` : `(${issnClause(issns)})`));
   parts.push(sourceParts.length > 1 ? `(${sourceParts.join(' OR ')})` : sourceParts[0]);
 
   const topic = q.topic ? topicById(q.topic) : undefined;
