@@ -20,7 +20,7 @@ export const HEAD_NECK_RELEVANCE_QUERY =
 
 /** Facial plastic, aesthetic and reconstructive surgery of the head, face and neck (not breast or body). */
 export const FACIAL_RELEVANCE_QUERY =
-  '("Face"[MeSH] OR "Rhinoplasty"[MeSH] OR "Blepharoplasty"[MeSH] OR "Rhytidoplasty"[MeSH] OR "Botulinum Toxins"[MeSH] OR face[tiab] OR facial[tiab] OR rhinoplast*[tiab] OR nose[tiab] OR nasal[tiab] OR blepharoplast*[tiab] OR eyelid*[tiab] OR brow[tiab] OR forehead[tiab] OR facelift*[tiab] OR rhytidectom*[tiab] OR otoplast*[tiab] OR auricul*[tiab] OR ear[tiab] OR lip[tiab] OR lips[tiab] OR chin[tiab] OR genioplast*[tiab] OR neck[tiab] OR scalp[tiab] OR orbit*[tiab] OR craniofacial[tiab] OR cleft[tiab] OR mandib*[tiab] OR maxill*[tiab] OR botulinum[tiab] OR "dermal filler*"[tiab] OR "facial filler*"[tiab] OR "head and neck"[tiab])';
+  '("Face"[MeSH] OR "Rhinoplasty"[MeSH] OR "Blepharoplasty"[MeSH] OR "Rhytidoplasty"[MeSH] OR "Botulinum Toxins"[MeSH] OR face[tiab] OR facial[tiab] OR rhinoplast*[tiab] OR nose[tiab] OR nasal[tiab] OR blepharoplast*[tiab] OR eyelid*[tiab] OR brow[tiab] OR forehead[tiab] OR facelift*[tiab] OR rhytidectom*[tiab] OR otoplast*[tiab] OR auricul*[tiab] OR ear[tiab] OR lip[tiab] OR lips[tiab] OR chin[tiab] OR genioplast*[tiab] OR neck[tiab] OR scalp[tiab] OR orbit*[tiab] OR craniofacial[tiab] OR cleft[tiab] OR mandib*[tiab] OR maxill*[tiab] OR botulinum[tiab] OR "dermal filler*"[tiab] OR "facial filler*"[tiab] OR keloid*[tiab] OR "scar revision"[tiab] OR "head and neck"[tiab])';
 
 /** What a "broad" journal of each specialty is narrowed to. Evidence journals: anything in the other three. */
 export const RELEVANCE_QUERY: Record<SpecialtyId, string> = {

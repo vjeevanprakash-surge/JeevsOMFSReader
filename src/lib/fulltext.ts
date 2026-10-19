@@ -55,7 +55,7 @@ export interface FullText {
 }
 
 const API = 'https://www.ebi.ac.uk/europepmc/webservices/rest';
-const PARSER_VERSION = 1;
+const PARSER_VERSION = 2;
 
 /** From device storage, else fetched from Europe PMC and stored. Throws `NotAvailable` when there is none. */
 export async function loadFullText(articleId: string, pmcid: string): Promise<FullText> {
@@ -250,13 +250,15 @@ export function parseFullText(xml: string, pmcid: string): FullText {
     return out;
   }
 
+  // The reference list is shown on its own, wherever the XML puts it (in <back>, or in a body section).
+  const isRefSec = (el: Element) =>
+    el.getAttribute('sec-type') === 'ref-list' || Array.from(el.getElementsByTagName('*')).some((e) => e.localName === 'ref-list');
+  const subSections = (el: Element) => kids(el).filter((c) => c.localName === 'sec' && !isRefSec(c));
   const section = (el: Element, fallbackTitle = ''): Section => ({
     id: el.getAttribute('id') ? `sec-${el.getAttribute('id')}` : nextId(),
     title: clean(child(el, 'title')?.textContent ?? '') || fallbackTitle,
     blocks: blocksOf(el),
-    children: kids(el)
-      .filter((c) => c.localName === 'sec')
-      .map((c) => section(c)),
+    children: subSections(el).map((c) => section(c)),
   });
 
   const sections: Section[] = [];
@@ -270,7 +272,7 @@ export function parseFullText(xml: string, pmcid: string): FullText {
   if (body) {
     const loose = blocksOf(body);
     if (loose.length) sections.push({ id: nextId(), title: '', blocks: loose, children: [] });
-    sections.push(...kids(body).filter((c) => c.localName === 'sec').map((c) => section(c)));
+    sections.push(...subSections(body).map((c) => section(c)).filter((s) => s.blocks.length || s.children.length));
   }
 
   // Figures and tables kept apart from the text.
@@ -284,17 +286,23 @@ export function parseFullText(xml: string, pmcid: string): FullText {
   const references: Reference[] = [];
   if (back) {
     for (const c of kids(back)) {
-      if (c.localName === 'sec' || c.localName === 'app-group' || c.localName === 'app') {
+      if ((c.localName === 'sec' && !isRefSec(c)) || c.localName === 'app-group' || c.localName === 'app') {
         const s = section(c, c.localName === 'sec' ? '' : 'Appendix');
         if (c.localName === 'app-group') s.children.push(...kids(c).filter((a) => a.localName === 'app').map((a) => section(a)));
         if (s.blocks.length || s.children.length) sections.push(s);
       } else if (c.localName === 'ack') {
         const s = section(c, 'Acknowledgements');
         if (s.blocks.length) sections.push(s);
-      } else if (c.localName === 'ref-list') {
-        for (const ref of Array.from(c.getElementsByTagName('*')).filter((e) => e.localName === 'ref')) references.push(reference(ref));
       }
     }
+  }
+  const seen = new Set<string>();
+  for (const ref of Array.from(article.getElementsByTagName('*'))) {
+    if (ref.localName !== 'ref' || ref.parentElement?.localName !== 'ref-list') continue;
+    const r = reference(ref);
+    if (r.id && seen.has(r.id)) continue;
+    seen.add(r.id);
+    references.push(r);
   }
   return { v: PARSER_VERSION, pmcid, sections, references };
 }

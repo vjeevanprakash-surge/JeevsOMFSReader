@@ -290,3 +290,20 @@ describe('specialty views', async () => {
     expect(new Set(issns).size).toBe(issns.length);
   });
 });
+
+describe('parseFullText: references inside the body', async () => {
+  const { parseFullText } = await import('./fulltext');
+  const doc = parseFullText(`<article><body>
+    <sec id="s1"><title>Results</title><p>Healed.</p></sec>
+    <sec id="Bib1" sec-type="ref-list"><title>References</title><sec><ref-list>
+      <ref id="CR1"><label>1.</label><mixed-citation>Robles DT, Berg D. Abnormal wound healing: keloids. Clin Dermatol. 2007;25:26–32. <pub-id pub-id-type="doi">10.1016/x</pub-id></mixed-citation></ref>
+    </ref-list></sec></sec>
+  </body></article>`, 'PMC2');
+
+  it('lists them as references, not as a text section', () => {
+    expect(doc.sections.map((s) => s.title)).toEqual(['Results']);
+    expect(doc.references).toHaveLength(1);
+    expect(doc.references[0]).toMatchObject({ id: 'CR1', label: '1', doi: '10.1016/x' });
+    expect(doc.references[0].text).toBe('Robles DT, Berg D. Abnormal wound healing: keloids. Clin Dermatol. 2007;25:26–32.');
+  });
+});
