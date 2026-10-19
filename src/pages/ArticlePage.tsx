@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { formatDate } from '../components/ArticleCard';
+import { formatDate } from '../lib/format';
 import BookmarkButton from '../components/BookmarkButton';
 import StudyBadge from '../components/StudyBadge';
 import { journalById } from '../data/journals';

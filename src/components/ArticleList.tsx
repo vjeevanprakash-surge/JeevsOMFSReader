@@ -34,6 +34,8 @@ export default function ArticleList({ query }: { query: Omit<ArticleQuery, 'page
   if (req.key !== key) {
     setReq({ key, page: 0 });
     setPages([]);
+    setLoading(true);
+    setErrors([]);
   }
 
   useEffect(() => {
@@ -47,8 +49,6 @@ export default function ArticleList({ query }: { query: Omit<ArticleQuery, 'page
         return next;
       });
 
-    setLoading(true);
-    setErrors([]);
     cachedQuery(q).then((c) => {
       if (cancelled || fresh || !c) return;
       setPage(c.articles);
@@ -77,7 +77,13 @@ export default function ArticleList({ query }: { query: Omit<ArticleQuery, 'page
   }, [req]);
 
   // Try again by itself when the connection comes back.
-  const retry = () => setReq((r) => ({ ...r }));
+  /** Starts a request: the same page again (retry) or the next one. */
+  const request = (page?: number) => {
+    setLoading(true);
+    setErrors([]);
+    setReq((r) => ({ ...r, page: page ?? r.page }));
+  };
+  const retry = () => request();
   useEffect(() => {
     if (!errors.length) return;
     window.addEventListener('online', retry);
@@ -114,7 +120,7 @@ export default function ArticleList({ query }: { query: Omit<ArticleQuery, 'page
       </div>
       {!loading && !articles.length && !errors.length && <p className="empty">No articles match these filters.</p>}
       {hasMore && !loading && (
-        <button type="button" className="btn btn-more" onClick={() => setReq((r) => ({ ...r, page: r.page + 1 }))}>
+        <button type="button" className="btn btn-more" onClick={() => request(req.page + 1)}>
           Load more
         </button>
       )}

@@ -1,8 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DEFAULT_SPECIALTY, specialtyLabel } from '../data/specialties';
+import { filtersFromParams } from '../lib/filters';
 import { addRecent, clearRecent, getRecent, searchPath, type RecentSearch } from '../lib/recent';
-import { filtersFromParams } from './Filters';
 import RecentChips from './RecentChips';
 
 /** How far the on-screen keyboard covers the page, so the bar can sit just above it. */

@@ -3,7 +3,8 @@ import ArticleList from '../components/ArticleList';
 import InstallBanner from '../components/InstallBanner';
 import { JOURNALS, REGIONS } from '../data/journals';
 import { SPECIALTIES, specialtyLabel } from '../data/specialties';
-import Filters, { filtersFromParams, filtersToParams, filtersToQuery } from '../components/Filters';
+import Filters from '../components/Filters';
+import { filtersFromParams, filtersToParams, filtersToQuery } from '../lib/filters';
 
 export default function BrowsePage() {
   const [params, setParams] = useSearchParams();

@@ -21,7 +21,8 @@ export const JOURNALS: Journal[] = [
   { id: 'hnpath', name: 'Head and Neck Pathology', abbr: 'Head Neck Pathol', region: 'USA', issns: ['1936-055X', '1936-0568'], specialty: 'headneck', source: 'pubmed', freePct: 89 },
   { id: 'cidrr', name: 'Clinical Implant Dentistry and Related Research', abbr: 'Clin Implant Dent Relat Res', region: 'USA', issns: ['1523-0899', '1708-8208'], source: 'pubmed', freePct: 41 },
   { id: 'prsgo', name: 'Plastic and Reconstructive Surgery – Global Open', abbr: 'Plast Reconstr Surg Glob Open', region: 'USA', issns: ['2169-7574'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
-  { id: 'fpsam', name: 'Facial Plastic Surgery & Aesthetic Medicine', abbr: 'Facial Plast Surg Aesthet Med', region: 'USA', issns: ['2689-3614', '2689-3622'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 8 },
+  // Formerly JAMA Facial Plastic Surgery (2013–2019): its ISSNs bring in the back issues.
+  { id: 'fpsam', name: 'Facial Plastic Surgery & Aesthetic Medicine', abbr: 'Facial Plast Surg Aesthet Med', region: 'USA', issns: ['2689-3614', '2689-3622', '2168-6076', '2168-6092'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 8 },
   { id: 'microsurg', name: 'Microsurgery', abbr: 'Microsurgery', region: 'USA', issns: ['0738-1085', '1098-2752'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 15 },
   { id: 'jrm', name: 'Journal of Reconstructive Microsurgery', abbr: 'J Reconstr Microsurg', region: 'USA', issns: ['0743-684X', '1098-8947'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 7 },
 
@@ -142,6 +143,17 @@ export const JOURNALS: Journal[] = [
   { id: 'ebd', name: 'Evidence-Based Dentistry', abbr: 'Evid Based Dent', region: 'UK', issns: ['1462-0049', '1476-5446'], specialty: 'evidence', source: 'pubmed', broad: true, freePct: 23 },
   // Head and neck
   { id: 'johns', name: 'Journal of Otolaryngology – Head & Neck Surgery', abbr: 'J Otolaryngol Head Neck Surg', region: 'Canada', issns: ['1916-0216', '1916-0208'], specialty: 'headneck', source: 'pubmed', broad: true, freePct: 100 },
+  // ---- Added 2026-10-19 (v1.12): more facial plastics and aesthetic medicine ---------------------
+  { id: 'archps', name: 'Archives of Plastic Surgery', abbr: 'Arch Plast Surg', region: 'Korea', issns: ['2234-6163', '2234-6171'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'semps', name: 'Seminars in Plastic Surgery', abbr: 'Semin Plast Surg', region: 'USA', issns: ['1535-2188', '1536-0067'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 76 },
+  { id: 'dermsurg', name: 'Dermatologic Surgery', abbr: 'Dermatol Surg', region: 'USA', issns: ['1076-0512', '1524-4725'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 4 },
+  { id: 'jcd', name: 'Journal of Cosmetic Dermatology', abbr: 'J Cosmet Dermatol', region: 'UK', issns: ['1473-2130', '1473-2165'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'jcad', name: 'Journal of Clinical and Aesthetic Dermatology', abbr: 'J Clin Aesthet Dermatol', region: 'USA', issns: ['1941-2789', '2689-9175'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'ccid', name: 'Clinical, Cosmetic and Investigational Dermatology', abbr: 'Clin Cosmet Investig Dermatol', region: 'UK', issns: ['1178-7015'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'cjprs', name: 'Chinese Journal of Plastic and Reconstructive Surgery', abbr: 'Chin J Plast Reconstr Surg', region: 'China', issns: ['2096-6911'], specialty: 'facial', source: 'crossref', freePct: 100 },
+  { id: 'ijt', name: 'International Journal of Trichology', abbr: 'Int J Trichology', region: 'India', issns: ['0974-7753', '0974-9241'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  // Open access (Medknow) but few recent records in Crossref and none in PubMed; earlier title's ISSNs kept for its archive.
+  { id: 'tjps', name: 'Turkish Journal of Plastic Surgery', abbr: 'Turk J Plast Surg', region: 'Europe', issns: ['1300-6878', '1308-8475', '2528-8644'], specialty: 'facial', source: 'crossref', freePct: 100 },
 ];
 
 export const REGIONS: Region[] = ['USA', 'UK', 'Europe', 'India', 'Korea', 'Japan', 'China', 'Asia', 'Australia', 'Canada', 'Latin America', 'Middle East'];

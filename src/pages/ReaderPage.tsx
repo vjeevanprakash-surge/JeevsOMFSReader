@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { formatDate } from '../components/ArticleCard';
+import { formatDate } from '../lib/format';
 import { loadArticle } from '../lib/article';
 import { loadFullText, NotAvailable, type Block, type FullText, type Inline, type Reference, type Section } from '../lib/fulltext';
 import { articlePath, parseArticleId } from '../lib/routes';
@@ -48,7 +48,6 @@ export default function ReaderPage() {
   useEffect(() => {
     if (!article?.pmcid) return;
     let cancelled = false;
-    setError('');
     loadFullText(article.id, article.pmcid)
       .then((d) => !cancelled && setDoc(d))
       .catch((e) => !cancelled && setError(e instanceof NotAvailable ? 'none' : navigator.onLine ? 'other' : 'offline'));
@@ -131,7 +130,10 @@ export default function ReaderPage() {
               Open on PMC
             </a>
           ) : (
-            <button type="button" className="btn btn-retry" onClick={() => setAttempt((n) => n + 1)}>
+            <button type="button" className="btn btn-retry" onClick={() => {
+                setError('');
+                setAttempt((n) => n + 1);
+              }}>
               Try again
             </button>
           )}

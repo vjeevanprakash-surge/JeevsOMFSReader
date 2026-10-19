@@ -3,18 +3,10 @@ import { Link } from 'react-router-dom';
 import { journalById } from '../data/journals';
 import { isNew } from '../lib/pdf';
 import { articlePath } from '../lib/routes';
+import { formatDate, shortAuthors } from '../lib/format';
 import type { Article } from '../lib/types';
 import BookmarkButton from './BookmarkButton';
 import StudyBadge from './StudyBadge';
-
-export const formatDate = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-
-export function shortAuthors(a: Article) {
-  if (!a.authors.length) return 'No authors listed';
-  const first = `${a.authors[0].last} ${a.authors[0].initials}`;
-  return a.authors.length > 2 ? `${first} et al.` : a.authors.map((x) => `${x.last} ${x.initials}`).join(', ');
-}
 
 /** `index` staggers the entrance animation (position within its page of results). */
 /** `note`: an optional line shown under the title (e.g. why a classic paper matters). */

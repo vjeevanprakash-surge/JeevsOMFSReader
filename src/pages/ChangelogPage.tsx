@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatDate } from '../components/ArticleCard';
+import { formatDate } from '../lib/format';
 import { APP_VERSION, CHANGELOG, type Release } from '../data/changelog';
 
 export function ReleaseCard({ r, index = 0 }: { r: Release; index?: number }) {

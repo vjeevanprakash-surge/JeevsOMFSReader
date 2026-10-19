@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useReducer, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import ArticleList from '../components/ArticleList';
-import Filters, { filtersFromParams, filtersToParams, filtersToQuery } from '../components/Filters';
+import Filters from '../components/Filters';
+import { filtersFromParams, filtersToParams, filtersToQuery } from '../lib/filters';
 import RecentChips from '../components/RecentChips';
 import { selectJournals } from '../data/journals';
 import { specialtyLabel } from '../data/specialties';
@@ -19,7 +20,9 @@ export default function SearchPage() {
   const sort = params.get('sort') === 'newest' ? 'newest' : 'relevance';
   const keep = { q, by: mode, sort: sort === 'newest' ? 'newest' : '' };
   const [draft, setDraft] = useState(q);
-  const [recent, setRecent] = useState(getRecent);
+  // Read fresh each render (a tiny list in localStorage); bumped to re-render after clearing.
+  const recent = getRecent();
+  const [, rerender] = useReducer((n: number) => n + 1, 0);
   const inputRef = useRef<HTMLInputElement>(null);
   const focusRequested = (useLocation().state as { focus?: boolean } | null)?.focus;
 
@@ -32,7 +35,6 @@ export default function SearchPage() {
   useEffect(() => {
     if (q) {
       addRecent({ q, by: mode });
-      setRecent(getRecent());
     }
   }, [q, mode]);
 
@@ -102,7 +104,7 @@ export default function SearchPage() {
                 onPick={pickRecent}
                 onClear={() => {
                   clearRecent();
-                  setRecent([]);
+                  rerender();
                 }}
               />
               <p className="empty">

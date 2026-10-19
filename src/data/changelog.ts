@@ -12,6 +12,16 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.12',
+    date: '2026-10-19',
+    title: 'More facial plastics and aesthetic medicine',
+    changes: [
+      'Nine more journals in Facial Plastics: Archives of Plastic Surgery, Seminars in Plastic Surgery, Dermatologic Surgery, Journal of Cosmetic Dermatology, Journal of Clinical and Aesthetic Dermatology, Clinical, Cosmetic and Investigational Dermatology, Chinese Journal of Plastic and Reconstructive Surgery, International Journal of Trichology and Turkish Journal of Plastic Surgery (109 journals in all).',
+      'JAMA Facial Plastic Surgery back issues (2013–2019) now appear under Facial Plastic Surgery & Aesthetic Medicine, its new name.',
+      'Dermatology journals are narrowed to the face, head and neck; hair restoration now counts as a Facial Plastics topic.',
+    ],
+  },
+  {
     version: '1.11',
     date: '2026-10-19',
     title: 'Version history',
