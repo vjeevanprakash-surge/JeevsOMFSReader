@@ -307,3 +307,23 @@ describe('parseFullText: references inside the body', async () => {
     expect(doc.references[0].text).toBe('Robles DT, Berg D. Abnormal wound healing: keloids. Clin Dermatol. 2007;25:26–32.');
   });
 });
+
+describe('changelog', async () => {
+  const { CHANGELOG, APP_VERSION } = await import('../data/changelog');
+  const pkg = (await import('../../package.json')).default as { version: string };
+
+  it('lists unique versions, newest first, each with changes', () => {
+    expect(new Set(CHANGELOG.map((r) => r.version)).size).toBe(CHANGELOG.length);
+    const num = (v: string) => v.split('.').map(Number);
+    for (let i = 1; i < CHANGELOG.length; i++) {
+      const [a, b] = [num(CHANGELOG[i - 1].version), num(CHANGELOG[i].version)];
+      expect(a[0] * 1000 + a[1]).toBeGreaterThan(b[0] * 1000 + b[1]);
+      expect(CHANGELOG[i - 1].date >= CHANGELOG[i].date).toBe(true);
+    }
+    expect(CHANGELOG.every((r) => r.changes.length > 0)).toBe(true);
+  });
+
+  it('matches package.json', () => {
+    expect(pkg.version.startsWith(`${APP_VERSION}.`)).toBe(true);
+  });
+});

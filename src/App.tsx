@@ -3,8 +3,10 @@ import { HashRouter, NavLink, Route, Routes, useLocation, useNavigate } from 're
 import FloatingSearch from './components/FloatingSearch';
 import { SEARCH_SHORTCUT } from './lib/recent';
 import { applyUpdate, onNavigate, onUpdatePending, updatePending } from './lib/update';
+import { APP_VERSION } from './data/changelog';
 import ArticlePage from './pages/ArticlePage';
 import BrowsePage from './pages/BrowsePage';
+import ChangelogPage from './pages/ChangelogPage';
 import ClassicsPage from './pages/ClassicsPage';
 import ReaderPage from './pages/ReaderPage';
 import SavedPage from './pages/SavedPage';
@@ -73,6 +75,38 @@ function UpdateNotice() {
   );
 }
 
+const SEEN_KEY = 'omfs-seen-version';
+
+/** After an update: which version this device was on before, if it changed (read once per load). */
+function previousVersion(): string | undefined {
+  try {
+    const seen = localStorage.getItem(SEEN_KEY);
+    localStorage.setItem(SEEN_KEY, APP_VERSION);
+    return seen && seen !== APP_VERSION ? seen : undefined;
+  } catch {
+    return undefined;
+  }
+}
+const UPDATED_FROM = previousVersion();
+
+/** "Updated to vX": shown once after a new version arrives, linking to what changed. */
+function UpdatedNotice() {
+  const [open, setOpen] = useState(!!UPDATED_FROM);
+  const { pathname } = useLocation();
+  if (!open || pathname === '/changelog') return null;
+  return (
+    <div className="update-notice glass" role="status">
+      <span>🎉 Updated to v{APP_VERSION}</span>
+      <NavLink to="/changelog" className="btn btn-primary" onClick={() => setOpen(false)}>
+        What’s new
+      </NavLink>
+      <button type="button" className="notice-close" aria-label="Dismiss" onClick={() => setOpen(false)}>
+        ×
+      </button>
+    </div>
+  );
+}
+
 function Shell() {
   const online = useOnline();
   const { pathname } = useLocation();
@@ -122,6 +156,7 @@ function Shell() {
         ))}
       </nav>
       <UpdateNotice />
+      <UpdatedNotice />
       {!online && <div className="offline">You're offline — showing saved and cached articles.</div>}
       <main className="main">
         {/* Keyed by route so each page fades in. */}
@@ -135,6 +170,7 @@ function Shell() {
             <Route path="/saved" element={<SavedPage />} />
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/changelog" element={<ChangelogPage />} />
             <Route
               path="*"
               element={

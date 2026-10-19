@@ -1,4 +1,7 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { APP_VERSION, CHANGELOG } from '../data/changelog';
+import { ReleaseCard } from './ChangelogPage';
 import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, specialtyOf } from '../data/journals';
 import { specialtyLabel } from '../data/specialties';
 import InstallBanner from '../components/InstallBanner';
@@ -27,6 +30,16 @@ export default function SettingsPage() {
       <div className="page-head">
         <h1>Settings</h1>
       </div>
+      <section className="whats-new" aria-labelledby="whats-new-title">
+        <div className="whats-new-head">
+          <h2 id="whats-new-title">What’s new</h2>
+          <span className="muted">Version {APP_VERSION}</span>
+        </div>
+        <ReleaseCard r={CHANGELOG[0]} />
+        <Link className="btn whats-new-all" to="/changelog">
+          Version history ({CHANGELOG.length} versions) →
+        </Link>
+      </section>
       <form className="settings panel" onSubmit={submit}>
         <label>
           NCBI API key <span className="muted">(optional)</span>
