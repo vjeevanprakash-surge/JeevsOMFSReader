@@ -88,6 +88,8 @@ export default function SettingsPage() {
                       {j.source === 'crossref' && ' · via Crossref'}
                       {specialtyOf(j) !== 'omfs' && ` · ${specialtyLabel(specialtyOf(j))}`}
                       {j.broad && ` · ${specialtyLabel(specialtyOf(j))}-filtered`}
+                      {j.pubmedLag && ' · recent papers via Crossref'}
+                      {j.lastPapers && ` · archive: no new papers since ${j.lastPapers}`}
                     </span>
                   </li>
                 ))}

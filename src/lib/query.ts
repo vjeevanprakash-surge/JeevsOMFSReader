@@ -2,6 +2,7 @@ import { selectJournals } from '../data/journals';
 import { searchCrossref } from './crossref';
 import { cacheArticles, cachedQueryResult, saveQueryResult } from './db';
 import { enrichOpenAccess } from './europepmc';
+import { pubmedGap } from './gap';
 import { PAGE_SIZE, searchPubmed } from './pubmed';
 import type { ArticleQuery, QueryResult } from './types';
 
@@ -12,13 +13,15 @@ export async function runQuery(q: ArticleQuery): Promise<QueryResult> {
   const errors: string[] = [];
   const crossrefRows = pubmedJ.length ? 6 : PAGE_SIZE;
 
-  const [pm, cr] = await Promise.all([
+  const [pm, cr, gap] = await Promise.all([
     searchPubmed(pubmedJ, q).catch((e) => {
       errors.push(`PubMed: ${e.message}`);
       return { articles: [], total: 0 };
     }),
     // Crossref journals get a full page when browsing them alone, otherwise a share alongside PubMed.
     searchCrossref(crossrefJ, q, crossrefRows),
+    // Papers from the PubMed journals that PubMed hasn't caught up with yet (see gap.ts).
+    pubmedGap(pubmedJ, q).catch(() => []),
   ]);
   errors.push(...cr.errors);
 
@@ -29,16 +32,16 @@ export async function runQuery(q: ArticleQuery): Promise<QueryResult> {
     errors.push(`Europe PMC (open-access status): ${(e as Error).message}`);
   }
 
+  const onPage = new Set(pubmedArticles.map((a) => a.doi?.toLowerCase()));
+  const sources = [pubmedArticles, cr.articles, gap.filter((a) => !onPage.has(a.doi!.toLowerCase()))];
   // Newest: one timeline. Relevance: each source is already ranked, so interleave them by rank position.
   const merged =
     q.sort === 'relevance'
-      ? [
-          ...pubmedArticles.map((a, i) => ({ a, k: i / pubmedArticles.length })),
-          ...cr.articles.map((a, i) => ({ a, k: i / cr.articles.length })),
-        ]
+      ? sources
+          .flatMap((list) => list.map((a, i) => ({ a, k: i / list.length })))
           .sort((x, y) => x.k - y.k)
           .map((x) => x.a)
-      : [...pubmedArticles, ...cr.articles].sort((a, b) => b.addedDate.localeCompare(a.addedDate));
+      : sources.flat().sort((a, b) => b.addedDate.localeCompare(a.addedDate));
   const articles = await cacheArticles(merged).catch(() => merged);
   const hasMore = (q.page + 1) * PAGE_SIZE < pm.total || (q.page + 1) * crossrefRows < cr.total;
   const total = pm.total + cr.total;

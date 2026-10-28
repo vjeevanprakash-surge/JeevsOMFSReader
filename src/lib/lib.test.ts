@@ -327,3 +327,52 @@ describe('changelog', async () => {
     expect(pkg.version.startsWith(`${APP_VERSION}.`)).toBe(true);
   });
 });
+
+describe('PubMed gap fill', async () => {
+  const { relevanceMatcher, relevant, pubmedGap } = await import('./gap');
+  const { FACIAL_RELEVANCE_QUERY } = await import('../data/specialties');
+  const { vi, afterEach } = await import('vitest');
+  const jcd = journalById('jcd')!;
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('turns [tiab] terms into a whole-word matcher with wildcards', () => {
+    const m = relevanceMatcher(FACIAL_RELEVANCE_QUERY);
+    expect(m.test('Revision rhinoplasty outcomes')).toBe(true);
+    expect(m.test('Hair transplantation in women')).toBe(true);
+    expect(m.test('Nail psoriasis treated with lasers')).toBe(false);
+    expect(m.test('Clear skin')).toBe(false); // "ear" only as a whole word
+  });
+
+  it('applies the journal’s relevance filter for the view', () => {
+    const art = (title: string) => ({ ...mapCrossrefWork({ DOI: '10.1/x', title: [title], author: [{ family: 'A' }] }, jcd) });
+    expect(relevant(art('Facial filler complications'), [jcd], { page: 0, specialty: 'facial' })).toBe(true);
+    expect(relevant(art('Acne vulgaris in teens'), [jcd], { page: 0, specialty: 'facial' })).toBe(false);
+  });
+
+  it('keeps only papers PubMed does not have yet (no meeting abstracts), from 3 weeks to 6 months back', async () => {
+    const urls: string[] = [];
+    const works = ['10.1111/jocd.1', '10.1111/jocd.2', '10.1111/jocd.3'].map((DOI, i) => ({
+      DOI, ISSN: ['1473-2130'], title: ['Facial rejuvenation trial'], author: [{ family: 'Lee' }], created: { 'date-time': '2026-09-01T00:00:00Z' },
+      page: i === 2 ? 'S51-S52' : undefined, // a meeting abstract
+    }));
+    vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
+      urls.push(url);
+      const body = String(init?.body ?? '');
+      const json = url.includes('crossref')
+        ? { message: { items: works, 'total-results': 2 } }
+        : url.includes('esearch')
+          ? { esearchresult: { idlist: body.includes('aid') ? ['99'] : [] } }
+          : { result: { 99: { articleids: [{ idtype: 'doi', value: '10.1111/JOCD.1' }] } } };
+      return new Response(JSON.stringify(json));
+    });
+    const got = await pubmedGap([jcd], { page: 0, specialty: 'facial' }, Date.parse('2026-10-28'));
+    expect(got.map((a) => a.doi)).toEqual(['10.1111/jocd.2']);
+    expect(decodeURIComponent(urls[0])).toContain('from-created-date:2026-04-28,until-created-date:2026-10-07');
+    // Kept for the next visit: no new requests.
+    const before = urls.length;
+    expect((await pubmedGap([jcd], { page: 0, specialty: 'facial' }, Date.parse('2026-10-28'))).map((a) => a.doi)).toEqual(['10.1111/jocd.2']);
+    expect(urls.length).toBe(before);
+    expect(await pubmedGap([jcd], { page: 3 }, Date.parse('2026-10-28'))).toEqual([]);
+    expect(await pubmedGap([journalById('ijoms')!], { page: 0 }, Date.parse('2026-10-28'))).toEqual([]); // not lagging
+  });
+});

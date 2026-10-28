@@ -11,8 +11,8 @@ const CC_LICENSES = ['by', 'by-nc', 'by-nc-nd', 'by-nd', 'by-sa', 'by-nc-sa'].fl
   ['http', 'https'].flatMap((proto) => [`${proto}://creativecommons.org/licenses/${v}/4.0/`, `${proto}://creativecommons.org/licenses/${v}/4.0`]),
 );
 
-/** Front matter and notices Crossref registers as articles. */
-export const JUNK_TITLE = /^(editorial board|ed board|issue information|table of contents|toc|future issues|contents|masthead|cover|.*newsletter|corrigendum|erratum|retraction|correction to)\b|---/i;
+/** Front matter, notices and peer-review reports Crossref registers as articles. */
+export const JUNK_TITLE = /^(editorial board|ed board|issue information|table of contents|toc|future issues|contents|masthead|cover|.*newsletter|corrigendum|erratum|retraction|correction to|review of\s*:|decision letter|author response|reviewer report)\b|---/i;
 
 interface CrossrefWork {
   DOI: string;
@@ -79,14 +79,20 @@ export function mapCrossrefWork(w: CrossrefWork, journal: Journal): Article {
  * licence) with partly free ones (Creative Commons licences only). Requests run one after another:
  * Crossref rejects parallel requests from the public pool, and its 429s carry no CORS header.
  */
-export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows: number) {
+export async function searchCrossref(journals: Journal[], q: ArticleQuery, rows: number, opts: PageOptions = {}) {
   const open = q.freeOnly ? journals.filter((j) => j.freePct >= 95) : journals;
   const licensed = q.freeOnly ? journals.filter((j) => j.freePct < 95) : [];
-  const [a, b] = await Promise.all([crossrefPage(open, q, rows, false), crossrefPage(licensed, q, rows, true)]);
+  const [a, b] = await Promise.all([crossrefPage(open, q, rows, false, opts), crossrefPage(licensed, q, rows, true, opts)]);
   return { articles: [...a.articles, ...b.articles], total: a.total + b.total, errors: [...a.errors, ...b.errors] };
 }
 
-async function crossrefPage(journals: Journal[], q: ArticleQuery, rows: number, ccOnly: boolean) {
+interface PageOptions {
+  /** Only works registered with Crossref between these dates (YYYY-MM-DD, inclusive). */
+  created?: { from: string; until: string };
+  signal?: AbortSignal;
+}
+
+async function crossrefPage(journals: Journal[], q: ArticleQuery, rows: number, ccOnly: boolean, { created, signal }: PageOptions) {
   if (!journals.length) return { articles: [] as Article[], total: 0, errors: [] as string[] };
   const s = getSettings();
   const filters = [
@@ -94,6 +100,7 @@ async function crossrefPage(journals: Journal[], q: ArticleQuery, rows: number, 
     'type:journal-article',
     `from-pub-date:${q.yearFrom ?? 1900}`,
     `until-pub-date:${q.yearTo ?? 3000}`,
+    ...(created ? [`from-created-date:${created.from}`, `until-created-date:${created.until}`] : []),
     // Creative Commons licences (repeated license.url filters are OR-ed).
     ...(ccOnly ? CC_LICENSES.map((l) => `license.url:${l}`) : []),
   ];
@@ -112,7 +119,7 @@ async function crossrefPage(journals: Journal[], q: ArticleQuery, rows: number, 
 
   try {
     // Public pool: 1 request/second, 1 at a time (x-rate-limit / x-concurrency-limit headers).
-    const res = await limitedFetch(`${API}/works?${p}`, 1100);
+    const res = await limitedFetch(`${API}/works?${p}`, 1100, { signal });
     const json = await res.json();
     let articles = (json.message.items as (CrossrefWork & { ISSN?: string[] })[])
       .map((w) => {

@@ -74,6 +74,26 @@ async function freePmids(pmids: string[]): Promise<Set<string>> {
   return new Set((await res.json()).esearchresult?.idlist ?? []);
 }
 
+/** Which of these DOIs PubMed already has (lower-cased). */
+export async function pubmedDois(dois: string[]): Promise<Set<string>> {
+  if (!dois.length) return new Set();
+  const p = params({ db: 'pubmed', retmode: 'json', retmax: String(dois.length * 2) });
+  p.set('term', dois.map((d) => `"${d.replace(/"/g, '')}"[aid]`).join(' OR '));
+  const res = await limitedFetch(`${EUTILS}esearch.fcgi`, interval(), { method: 'POST', body: p });
+  const ids: string[] = (await res.json()).esearchresult?.idlist ?? [];
+  if (!ids.length) return new Set();
+  // esearch says how many matched, not which: the summaries carry each record's DOI.
+  const s = params({ db: 'pubmed', retmode: 'json', id: ids.join(',') });
+  const sum = await (await limitedFetch(`${EUTILS}esummary.fcgi`, interval(), { method: 'POST', body: s })).json();
+  const found = new Set<string>();
+  for (const id of ids) {
+    for (const a of (sum.result?.[id]?.articleids ?? []) as { idtype: string; value: string }[]) {
+      if (a.idtype === 'doi') found.add(a.value.toLowerCase());
+    }
+  }
+  return found;
+}
+
 /** Fetches full records; `allFree` skips the free-text check when the search was already free-only. */
 export async function fetchPubmed(pmids: string[], allFree = false): Promise<Article[]> {
   if (!pmids.length) return [];

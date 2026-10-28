@@ -30,6 +30,10 @@ export interface Journal {
   broad?: boolean;
   /** % of the journal's 2025 articles that are free to read (see journals.ts). ≥ 95 = every article free. */
   freePct: number;
+  /** PubMed falls months behind on it: recent papers are filled in from Crossref (see lib/gap.ts). */
+  pubmedLag?: boolean;
+  /** Stopped publishing (or registering papers): the year of its last ones. Kept for its archive. */
+  lastPapers?: number;
 }
 
 export interface Author {

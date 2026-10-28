@@ -6,13 +6,14 @@ import { DEFAULT_SPECIALTY, RELEVANCE_QUERY } from './specialties';
 // Crossref journals: share with a Creative Commons licence), measured 2026-10-15.
 // To add a journal: append one entry. Use source 'crossref' if PubMed has no records for it,
 // specialty if it isn't OMFS, and broad: true if it publishes much outside its specialty.
+// pubmedLag: true marks journals PubMed is months behind on (scripts/audit-pubmed-lag.py, 2026-10-28).
 export const JOURNALS: Journal[] = [
   // USA
   { id: 'joms', name: 'Journal of Oral and Maxillofacial Surgery', abbr: 'J Oral Maxillofac Surg', region: 'USA', issns: ['0278-2391', '1531-5053'], source: 'pubmed', freePct: 11 },
   { id: 'jcs', name: 'The Journal of Craniofacial Surgery', abbr: 'J Craniofac Surg', region: 'USA', issns: ['1049-2275', '1536-3732'], source: 'pubmed', broad: true, freePct: 5 },
   { id: 'cmtr', name: 'Craniomaxillofacial Trauma & Reconstruction', abbr: 'Craniomaxillofac Trauma Reconstr', region: 'USA', issns: ['1943-3875', '1943-3883'], source: 'pubmed', freePct: 100 },
   { id: 'oooo', name: 'Oral Surgery, Oral Medicine, Oral Pathology and Oral Radiology', abbr: 'Oral Surg Oral Med Oral Pathol Oral Radiol', region: 'USA', issns: ['2212-4403', '2212-4411'], source: 'pubmed', freePct: 14 },
-  { id: 'joi', name: 'Journal of Oral Implantology', abbr: 'J Oral Implantol', region: 'USA', issns: ['0160-6972', '1548-1336'], source: 'pubmed', freePct: 1 },
+  { id: 'joi', name: 'Journal of Oral Implantology', abbr: 'J Oral Implantol', region: 'USA', issns: ['0160-6972', '1548-1336'], source: 'pubmed', freePct: 1, pubmedLag: true },
   { id: 'semorth', name: 'Seminars in Orthodontics', abbr: 'Semin Orthod', region: 'USA', issns: ['1073-8746', '1558-4631'], source: 'crossref', freePct: 25 },
   { id: 'omscna', name: 'Oral and Maxillofacial Surgery Clinics of North America', abbr: 'Oral Maxillofac Surg Clin North Am', region: 'USA', issns: ['1042-3699', '1558-1365'], source: 'pubmed', freePct: 0 },
   { id: 'atlas', name: 'Atlas of the Oral and Maxillofacial Surgery Clinics', abbr: 'Atlas Oral Maxillofac Surg Clin North Am', region: 'USA', issns: ['1061-3315', '1558-4275'], source: 'pubmed', freePct: 0 },
@@ -40,7 +41,7 @@ export const JOURNALS: Journal[] = [
   { id: 'bjoms', name: 'British Journal of Oral and Maxillofacial Surgery', abbr: 'Br J Oral Maxillofac Surg', region: 'UK', issns: ['0266-4356', '1532-1940'], source: 'pubmed', freePct: 11 },
   { id: 'oralsurg', name: 'Oral Surgery (BAOS)', abbr: 'Oral Surg', region: 'UK', issns: ['1752-2471', '1752-248X'], source: 'crossref', freePct: 14 },
 
-  { id: 'bmcoh', name: 'BMC Oral Health', abbr: 'BMC Oral Health', region: 'UK', issns: ['1472-6831'], source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'bmcoh', name: 'BMC Oral Health', abbr: 'BMC Oral Health', region: 'UK', issns: ['1472-6831'], source: 'pubmed', broad: true, freePct: 100, pubmedLag: true },
   { id: 'jpras', name: 'Journal of Plastic, Reconstructive & Aesthetic Surgery', abbr: 'J Plast Reconstr Aesthet Surg', region: 'UK', issns: ['1748-6815', '1878-0539'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 19 },
   { id: 'jprasopen', name: 'JPRAS Open', abbr: 'JPRAS Open', region: 'UK', issns: ['2352-5878'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
   { id: 'jor', name: 'Journal of Oral Rehabilitation', abbr: 'J Oral Rehabil', region: 'UK', issns: ['0305-182X', '1365-2842'], source: 'pubmed', broad: true, freePct: 45 },
@@ -48,7 +49,7 @@ export const JOURNALS: Journal[] = [
 
   // Europe
   { id: 'ijoms', name: 'International Journal of Oral and Maxillofacial Surgery', abbr: 'Int J Oral Maxillofac Surg', region: 'Europe', issns: ['0901-5027', '1399-0020'], source: 'pubmed', freePct: 24 },
-  { id: 'jcms', name: 'Journal of Cranio-Maxillofacial Surgery', abbr: 'J Craniomaxillofac Surg', region: 'Europe', issns: ['1010-5182', '1878-4119'], source: 'pubmed', freePct: 30 },
+  { id: 'jcms', name: 'Journal of Cranio-Maxillofacial Surgery', abbr: 'J Craniomaxillofac Surg', region: 'Europe', issns: ['1010-5182', '1878-4119'], source: 'pubmed', freePct: 30, pubmedLag: true },
   { id: 'jsomfs', name: 'Journal of Stomatology, Oral and Maxillofacial Surgery', abbr: 'J Stomatol Oral Maxillofac Surg', region: 'Europe', issns: ['2468-7855', '2468-8509'], source: 'pubmed', freePct: 13 },
   { id: 'oraloncol', name: 'Oral Oncology', abbr: 'Oral Oncol', region: 'Europe', issns: ['1368-8375', '1879-0593'], specialty: 'headneck', source: 'pubmed', broad: true, freePct: 16 },
   { id: 'oralonrep', name: 'Oral Oncology Reports', abbr: 'Oral Oncol Rep', region: 'Europe', issns: ['2772-9060'], source: 'crossref', freePct: 100 },
@@ -71,21 +72,21 @@ export const JOURNALS: Journal[] = [
   { id: 'progorth', name: 'Progress in Orthodontics', abbr: 'Prog Orthod', region: 'Europe', issns: ['1723-7785', '2196-1042'], source: 'pubmed', broad: true, freePct: 100 },
   { id: 'foh', name: 'Frontiers in Oral Health', abbr: 'Front Oral Health', region: 'Europe', issns: ['2673-4842'], source: 'pubmed', broad: true, freePct: 100 },
   // Ceased 2019: archive articles only (no records in PubMed or Europe PMC).
-  { id: 'ohdm', name: 'Oral Health and Dental Management', abbr: 'Oral Health Dent Manag', region: 'Europe', issns: ['2247-2452'], source: 'crossref', freePct: 0 },
+  { id: 'ohdm', name: 'Oral Health and Dental Management', abbr: 'Oral Health Dent Manag', region: 'Europe', issns: ['2247-2452'], source: 'crossref', freePct: 0, lastPapers: 2019 },
 
   // India
-  { id: 'jmos', name: 'Journal of Maxillofacial and Oral Surgery', abbr: 'J Maxillofac Oral Surg', region: 'India', issns: ['0972-8279', '0974-942X'], source: 'pubmed', freePct: 63 },
+  { id: 'jmos', name: 'Journal of Maxillofacial and Oral Surgery', abbr: 'J Maxillofac Oral Surg', region: 'India', issns: ['0972-8279', '0974-942X'], source: 'pubmed', freePct: 63, pubmedLag: true },
   { id: 'ams', name: 'Annals of Maxillofacial Surgery', abbr: 'Ann Maxillofac Surg', region: 'India', issns: ['2231-0746', '2249-3816'], source: 'pubmed', freePct: 100 },
   { id: 'jobcr', name: 'Journal of Oral Biology and Craniofacial Research', abbr: 'J Oral Biol Craniofac Res', region: 'India', issns: ['2212-4268', '2212-4276'], source: 'pubmed', freePct: 100 },
   { id: 'njms', name: 'National Journal of Maxillofacial Surgery', abbr: 'Natl J Maxillofac Surg', region: 'India', issns: ['0975-5950', '2229-3418'], source: 'pubmed', freePct: 100 },
-  { id: 'ijps', name: 'Indian Journal of Plastic Surgery', abbr: 'Indian J Plast Surg', region: 'India', issns: ['0970-0358', '1998-376X'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'ijps', name: 'Indian Journal of Plastic Surgery', abbr: 'Indian J Plast Surg', region: 'India', issns: ['0970-0358', '1998-376X'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100, pubmedLag: true },
   { id: 'ccd', name: 'Contemporary Clinical Dentistry', abbr: 'Contemp Clin Dent', region: 'India', issns: ['0976-237X', '0976-2361'], source: 'pubmed', broad: true, freePct: 100 },
 
   // Korea
   { id: 'jkaoms', name: 'Journal of the Korean Association of Oral and Maxillofacial Surgeons', abbr: 'J Korean Assoc Oral Maxillofac Surg', region: 'Korea', issns: ['2234-7550', '2234-5930'], source: 'pubmed', freePct: 100 },
   { id: 'acfs', name: 'Archives of Craniofacial Surgery', abbr: 'Arch Craniofac Surg', region: 'Korea', issns: ['2287-1152', '2287-5603'], source: 'pubmed', freePct: 100 },
   { id: 'mprs', name: 'Maxillofacial Plastic and Reconstructive Surgery', abbr: 'Maxillofac Plast Reconstr Surg', region: 'Korea', issns: ['2288-8101', '2288-8586'], source: 'pubmed', freePct: 100 },
-  { id: 'isd', name: 'Imaging Science in Dentistry', abbr: 'Imaging Sci Dent', region: 'Korea', issns: ['2233-7822', '2233-7830'], source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'isd', name: 'Imaging Science in Dentistry', abbr: 'Imaging Sci Dent', region: 'Korea', issns: ['2233-7822', '2233-7830'], source: 'pubmed', broad: true, freePct: 100, pubmedLag: true },
 
   // Japan
   { id: 'osi', name: 'Oral Science International', abbr: 'Oral Sci Int', region: 'Japan', issns: ['1348-8643', '1881-4204'], source: 'crossref', freePct: 8 },
@@ -138,22 +139,22 @@ export const JOURNALS: Journal[] = [
   { id: 'jdapm', name: 'Journal of Dental Anesthesia and Pain Medicine', abbr: 'J Dent Anesth Pain Med', region: 'Korea', issns: ['2383-9309', '2383-9317'], source: 'pubmed', freePct: 100 },
   { id: 'ocr', name: 'Orthodontics & Craniofacial Research', abbr: 'Orthod Craniofac Res', region: 'Europe', issns: ['1601-6335', '1601-6343'], source: 'pubmed', broad: true, freePct: 43 },
   // Evidence and methods (narrowed to OMFS, head and neck, and facial topics)
-  { id: 'sysrev', name: 'Systematic Reviews', abbr: 'Syst Rev', region: 'UK', issns: ['2046-4053'], specialty: 'evidence', source: 'pubmed', broad: true, freePct: 100 },
-  { id: 'jebdp', name: 'Journal of Evidence-Based Dental Practice', abbr: 'J Evid Based Dent Pract', region: 'USA', issns: ['1532-3382', '1532-3390'], specialty: 'evidence', source: 'pubmed', broad: true, freePct: 29 },
+  { id: 'sysrev', name: 'Systematic Reviews', abbr: 'Syst Rev', region: 'UK', issns: ['2046-4053'], specialty: 'evidence', source: 'pubmed', broad: true, freePct: 100, pubmedLag: true },
+  { id: 'jebdp', name: 'Journal of Evidence-Based Dental Practice', abbr: 'J Evid Based Dent Pract', region: 'USA', issns: ['1532-3382', '1532-3390'], specialty: 'evidence', source: 'pubmed', broad: true, freePct: 29, pubmedLag: true },
   { id: 'ebd', name: 'Evidence-Based Dentistry', abbr: 'Evid Based Dent', region: 'UK', issns: ['1462-0049', '1476-5446'], specialty: 'evidence', source: 'pubmed', broad: true, freePct: 23 },
   // Head and neck
   { id: 'johns', name: 'Journal of Otolaryngology – Head & Neck Surgery', abbr: 'J Otolaryngol Head Neck Surg', region: 'Canada', issns: ['1916-0216', '1916-0208'], specialty: 'headneck', source: 'pubmed', broad: true, freePct: 100 },
   // ---- Added 2026-10-19 (v1.12): more facial plastics and aesthetic medicine ---------------------
-  { id: 'archps', name: 'Archives of Plastic Surgery', abbr: 'Arch Plast Surg', region: 'Korea', issns: ['2234-6163', '2234-6171'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
-  { id: 'semps', name: 'Seminars in Plastic Surgery', abbr: 'Semin Plast Surg', region: 'USA', issns: ['1535-2188', '1536-0067'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 76 },
+  { id: 'archps', name: 'Archives of Plastic Surgery', abbr: 'Arch Plast Surg', region: 'Korea', issns: ['2234-6163', '2234-6171'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100, pubmedLag: true },
+  { id: 'semps', name: 'Seminars in Plastic Surgery', abbr: 'Semin Plast Surg', region: 'USA', issns: ['1535-2188', '1536-0067'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 76, pubmedLag: true },
   { id: 'dermsurg', name: 'Dermatologic Surgery', abbr: 'Dermatol Surg', region: 'USA', issns: ['1076-0512', '1524-4725'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 4 },
-  { id: 'jcd', name: 'Journal of Cosmetic Dermatology', abbr: 'J Cosmet Dermatol', region: 'UK', issns: ['1473-2130', '1473-2165'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'jcd', name: 'Journal of Cosmetic Dermatology', abbr: 'J Cosmet Dermatol', region: 'UK', issns: ['1473-2130', '1473-2165'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100, pubmedLag: true },
   { id: 'jcad', name: 'Journal of Clinical and Aesthetic Dermatology', abbr: 'J Clin Aesthet Dermatol', region: 'USA', issns: ['1941-2789', '2689-9175'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
   { id: 'ccid', name: 'Clinical, Cosmetic and Investigational Dermatology', abbr: 'Clin Cosmet Investig Dermatol', region: 'UK', issns: ['1178-7015'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
   { id: 'cjprs', name: 'Chinese Journal of Plastic and Reconstructive Surgery', abbr: 'Chin J Plast Reconstr Surg', region: 'China', issns: ['2096-6911'], specialty: 'facial', source: 'crossref', freePct: 100 },
-  { id: 'ijt', name: 'International Journal of Trichology', abbr: 'Int J Trichology', region: 'India', issns: ['0974-7753', '0974-9241'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100 },
+  { id: 'ijt', name: 'International Journal of Trichology', abbr: 'Int J Trichology', region: 'India', issns: ['0974-7753', '0974-9241'], specialty: 'facial', source: 'pubmed', broad: true, freePct: 100, pubmedLag: true },
   // Open access (Medknow) but few recent records in Crossref and none in PubMed; earlier title's ISSNs kept for its archive.
-  { id: 'tjps', name: 'Turkish Journal of Plastic Surgery', abbr: 'Turk J Plast Surg', region: 'Europe', issns: ['1300-6878', '1308-8475', '2528-8644'], specialty: 'facial', source: 'crossref', freePct: 100 },
+  { id: 'tjps', name: 'Turkish Journal of Plastic Surgery', abbr: 'Turk J Plast Surg', region: 'Europe', issns: ['1300-6878', '1308-8475', '2528-8644'], specialty: 'facial', source: 'crossref', freePct: 100, lastPapers: 2024 },
 ];
 
 export const REGIONS: Region[] = ['USA', 'UK', 'Europe', 'India', 'Korea', 'Japan', 'China', 'Asia', 'Australia', 'Canada', 'Latin America', 'Middle East'];

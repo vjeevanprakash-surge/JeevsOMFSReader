@@ -4,7 +4,7 @@ import type { Article, ArticleQuery } from '../lib/types';
 import ArticleCard from './ArticleCard';
 
 // What browsers say when a request never reaches the server (no signal, blocked network…).
-const NETWORK_FAILURE = /failed to fetch|load failed|networkerror|network request failed/i;
+const NETWORK_FAILURE = /failed to fetch|load failed|networkerror|network request failed|took too long to respond|aborted due to timeout/i;
 
 /** Plain-language summary of why sources failed. */
 function describeErrors(errors: string[], stale: boolean): string {

@@ -12,6 +12,18 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.13',
+    date: '2026-10-28',
+    title: 'Papers PubMed hasn’t caught up with',
+    changes: [
+      'PubMed can fall weeks or months behind for some journals (12 of them, including the Journal of Cranio-Maxillofacial Surgery, BMC Oral Health and Journal of Cosmetic Dermatology). For those, the app now also brings in their recent papers straight from the publisher records (Crossref), until PubMed lists them. No paper is shown twice.',
+      'Settings shows which journals get this, and marks two that have stopped publishing (their back issues stay readable).',
+      'On a bad connection, the list no longer stays on “Loading articles…” forever: after 45 seconds it says so and offers Try again.',
+      'Peer-review reports and meeting abstracts no longer appear as papers.',
+      'Behind-the-scenes updates and fixes.',
+    ],
+  },
+  {
     version: '1.12',
     date: '2026-10-19',
     title: 'More facial plastics and aesthetic medicine',
