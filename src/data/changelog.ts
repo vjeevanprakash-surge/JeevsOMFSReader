@@ -12,6 +12,16 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.18',
+    date: '2026-11-03',
+    title: 'Shorts fits your phone',
+    changes: [
+      'On phones, Shorts now fills exactly the screen between the header and the tab bar, whatever its size: a smaller title, compact specialty chips, and a long card scrolls inside itself so Skip, Save, Read and Share always stay just above the tab bar.',
+      'The tour is lighter: a small tip, a softer dim, and it no longer covers the buttons it points at.',
+      'The chime now plays on iPhone and Android too, on your first tap or swipe. On an iPhone with the silent switch on, web pages stay silent.',
+    ],
+  },
+  {
     version: '1.17',
     date: '2026-11-03',
     title: 'A quick tour of Shorts, and a welcome chime',

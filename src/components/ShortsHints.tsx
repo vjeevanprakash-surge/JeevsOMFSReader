@@ -19,7 +19,7 @@ const HINTS: Hint[] = [
 
 const PAD = 8;
 /** About the height of the tip box. */
-const TIP_H = 190;
+const TIP_H = 140;
 
 /** First-visit tour of Shorts: a spotlight on each control in turn, with Next / Skip. */
 export default function ShortsHints({ onDone }: { onDone: () => void }) {
@@ -42,10 +42,15 @@ export default function ShortsHints({ onDone }: { onDone: () => void }) {
     el.scrollIntoView({ block: 'nearest' });
     const update = () => setRect(el.getBoundingClientRect());
     const frame = requestAnimationFrame(update);
+    // Again once the card has finished sliding in.
+    const settled = setTimeout(update, 450);
+    el.addEventListener('animationend', update);
     window.addEventListener('resize', update);
     window.addEventListener('scroll', update, true);
     return () => {
       cancelAnimationFrame(frame);
+      clearTimeout(settled);
+      el.removeEventListener('animationend', update);
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
     };
@@ -65,7 +70,8 @@ export default function ShortsHints({ onDone }: { onDone: () => void }) {
   }, [next, finish]);
 
   if (!hint || !rect) return null;
-  // The tip goes where it fits: below the target, else above, else over its lower edge.
+  // The tip goes where it fits: below the target, else above, else inside its lower edge (a card
+  // that fills a phone screen), so it never covers the tab bar or the buttons under it.
   const vh = window.innerHeight;
   const room = TIP_H + PAD + 12;
   const below = vh - rect.bottom >= room || (rect.top < room && vh - rect.bottom >= rect.top);
@@ -79,7 +85,7 @@ export default function ShortsHints({ onDone }: { onDone: () => void }) {
     ? { top: Math.min(rect.bottom + PAD + 12, vh - TIP_H - 12) }
     : rect.top >= room
       ? { bottom: vh - rect.top + PAD + 12 }
-      : { bottom: 12 };
+      : { bottom: Math.max(12, vh - rect.bottom + PAD + 4) };
 
   return (
     <div className="hints" role="dialog" aria-modal="true" aria-labelledby="hint-title" onClick={next}>

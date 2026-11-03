@@ -180,8 +180,8 @@ export default function ShortsPage() {
       : undefined;
 
   return (
-    // The first tap of a visit plays the welcome chime (browsers allow no sound before one).
-    <div className="shorts" onPointerDown={welcomeOnce}>
+    // The first tap of a visit plays the welcome chime: on finger-up, the moment phones allow sound.
+    <div className="shorts" onPointerUp={welcomeOnce}>
       <header className="page-head">
         <p className="eyebrow">Three minutes between cases</p>
         <h1 className="shorts-title">
