@@ -40,7 +40,7 @@ export default function ArticlePage() {
   if (a === null)
     return (
       <p className="empty">
-        Article not found. <Link to="/">Back to browse</Link>
+        Article not found. <Link to="/browse">Back to browse</Link>
       </p>
     );
 

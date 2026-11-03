@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { HashRouter, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import FloatingSearch from './components/FloatingSearch';
 import { SEARCH_SHORTCUT } from './lib/recent';
 import { applyUpdate, onNavigate, onUpdatePending, updatePending } from './lib/update';
@@ -12,19 +12,30 @@ import ReaderPage from './pages/ReaderPage';
 import SavedPage from './pages/SavedPage';
 import SearchPage from './pages/SearchPage';
 import ShortsPage from './pages/ShortsPage';
+import { homeRedirect } from './lib/routes';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
 import { APP_NAME, TAGLINE } from './data/brand';
 
 const NAV = [
-  { to: '/', label: 'Browse', icon: '▦' },
-  { to: '/shorts', label: 'Shorts', icon: '⚡' },
+  { to: '/', label: 'Shorts', icon: '⚡' },
+  { to: '/browse', label: 'Browse', icon: '▦' },
   { to: '/search', label: 'Search', icon: '⌕' },
   { to: '/classics', label: 'Classics', icon: '❖' },
   { to: '/saved', label: 'Saved', icon: '★' },
   { to: '/stats', label: 'Stats', icon: '▤' },
   { to: '/settings', label: 'Settings', icon: '⚙' },
 ];
+
+/** Shorts, or Browse for an old link that carries Browse filters. */
+function Home() {
+  const { search } = useLocation();
+  const to = homeRedirect(search);
+  return to ? <Navigate to={to} replace /> : <ShortsPage />;
+}
+function ToHome() {
+  return <Navigate to={`/${useLocation().search}`} replace />;
+}
 
 function useOnline() {
   const [online, setOnline] = useState(navigator.onLine);
@@ -42,7 +53,7 @@ function useOnline() {
 }
 
 /** Pages that get the floating search bar on phones (not articles, so it never covers reading). */
-const FLOATING_SEARCH_ON = ['/', '/classics', '/saved', '/stats'];
+const FLOATING_SEARCH_ON = ['/browse', '/classics', '/saved', '/stats'];
 
 /** Ctrl+K / ⌘K: focus the search box, opening the Search page if needed. */
 function useSearchShortcut() {
@@ -164,8 +175,10 @@ function Shell() {
         {/* Keyed by route so each page fades in. */}
         <div className="page" key={pathname}>
           <Routes>
-            <Route path="/" element={<BrowsePage />} />
-            <Route path="/shorts" element={<ShortsPage />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/browse" element={<BrowsePage />} />
+            {/* v1.14 had Shorts here. */}
+            <Route path="/shorts" element={<ToHome />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/article/*" element={<ArticlePage />} />
             <Route path="/read/*" element={<ReaderPage />} />
@@ -178,7 +191,7 @@ function Shell() {
               path="*"
               element={
                 <p className="empty">
-                  Page not found. <NavLink to="/">Back to browse</NavLink>
+                  Page not found. <NavLink to="/">Back to Shorts</NavLink>
                 </p>
               }
             />

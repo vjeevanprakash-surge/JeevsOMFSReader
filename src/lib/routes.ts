@@ -18,3 +18,15 @@ export function parseArticleId(raw: string | undefined): string {
     return raw; // a literal % in an already-decoded DOI
   }
 }
+
+/** Browse filters (lib/filters.ts) other than the specialty, which Shorts shares. */
+const BROWSE_ONLY = ['region', 'journal', 'topic', 'type', 'from', 'to', 'all'];
+
+/**
+ * Shorts is the home page; Browse lives at /browse. Links made before (`#/?journal=jcd`) carry
+ * Browse filters: those go to Browse. Returns where to go, or undefined to show Shorts.
+ */
+export function homeRedirect(search: string): string | undefined {
+  const p = new URLSearchParams(search);
+  return BROWSE_ONLY.some((k) => p.has(k)) ? `/browse${search}` : undefined;
+}

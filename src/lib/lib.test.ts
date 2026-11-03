@@ -441,3 +441,13 @@ describe('high evidence', async () => {
     expect(term).not.toContain('"case reports"[pt]');
   });
 });
+
+describe('home page', async () => {
+  const { homeRedirect } = await import('./routes');
+  it('opens Shorts, but sends old Browse links with filters to /browse', () => {
+    expect(homeRedirect('')).toBeUndefined();
+    expect(homeRedirect('?spec=facial')).toBeUndefined(); // Shorts has specialties too
+    expect(homeRedirect('?spec=facial&journal=jcd&all=1')).toBe('/browse?spec=facial&journal=jcd&all=1');
+    expect(homeRedirect('?topic=oncology')).toBe('/browse?topic=oncology');
+  });
+});

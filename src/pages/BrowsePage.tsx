@@ -13,7 +13,7 @@ export default function BrowsePage() {
   const filters = filtersFromParams(params);
   const setFilters = (f: FilterState) => setParams(filtersToParams(f), { replace: true });
   const mine = getMyTopics();
-  const shortsLink = filters.specialty === 'omfs' || filters.specialty === 'all' ? '/shorts' : `/shorts?spec=${filters.specialty}`;
+  const shortsLink = filters.specialty === 'omfs' || filters.specialty === 'all' ? '/' : `/?spec=${filters.specialty}`;
 
   return (
     <>

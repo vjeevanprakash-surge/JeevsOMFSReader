@@ -270,7 +270,7 @@ export default function ShortsPage() {
             <p className="muted">Nothing new in this specialty right now.</p>
           )}
           <p>
-            <Link to="/">Browse everything →</Link>
+            <Link to="/browse">Browse everything →</Link>
           </p>
         </div>
       )}

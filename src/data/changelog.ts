@@ -12,6 +12,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.15',
+    date: '2026-11-03',
+    title: 'The app opens on Shorts',
+    changes: [
+      'Shorts is now the home page: open the app and the newest evidence is waiting, one card at a time.',
+      'Browse (every journal, all filters) is the second tab. Links shared before still open where they used to.',
+    ],
+  },
+  {
     version: '1.14',
     date: '2026-11-03',
     title: 'Shorts: the best new evidence, one card at a time',

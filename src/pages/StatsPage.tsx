@@ -70,7 +70,7 @@ function ReadingPanel({ r }: { r: ReadingStats }) {
       </div>
       {!r.total && (
         <p className="muted">
-          Papers you open count here. Try <Link to="/shorts">Shorts</Link> for three minutes of new evidence.
+          Papers you open count here. Try <Link to="/">Shorts</Link> for three minutes of new evidence.
         </p>
       )}
     </section>
