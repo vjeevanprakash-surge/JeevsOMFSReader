@@ -12,6 +12,16 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.17',
+    date: '2026-11-03',
+    title: 'A quick tour of Shorts, and a welcome chime',
+    changes: [
+      'First time on Shorts, a four-step tour shows how to swipe to the next paper, switch specialty, open the full paper and find Browse. Replay it any time from the ? next to the title.',
+      'A soft chime greets you on your first tap, and a gentle note confirms a saved paper. Browsers don’t allow sound before you touch the page, so it can’t play at load.',
+      'Settings → Sound and tips: switch the sounds off, or show the tour again.',
+    ],
+  },
+  {
     version: '1.16',
     date: '2026-11-03',
     title: 'Key results you can see, and a proper welcome',

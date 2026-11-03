@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import KeyResultChart from '../components/KeyResultChart';
 import ShareButton from '../components/ShareButton';
+import ShortsHints from '../components/ShortsHints';
 import StudyBadge from '../components/StudyBadge';
 import { DEFAULT_SPECIALTY, SPECIALTIES } from '../data/specialties';
 import { OTHER_TOPIC } from '../data/topics';
@@ -12,6 +13,8 @@ import { runQuery } from '../lib/query';
 import { canChart, quickTake, type QuickTake } from '../lib/quicktake';
 import { loadReadIds, markRead } from '../lib/reads';
 import { hideSplash } from '../lib/splash';
+import { hintsSeen } from '../lib/hints';
+import { playSave, welcomeOnce } from '../lib/sound';
 import { articlePath } from '../lib/routes';
 import type { Article, SpecialtyId } from '../lib/types';
 
@@ -22,6 +25,7 @@ interface Card {
 }
 
 const SWIPE_PX = 90;
+const TOUR_DELAY_MS = 700;
 /** Pages tried in one go when everything on a page has been read or skipped already. */
 const MAX_PAGES_PER_FILL = 3;
 
@@ -66,6 +70,7 @@ export default function ShortsPage() {
   const [dx, setDx] = useState(0);
   const [toast, setToast] = useState('');
   const [dragging, setDragging] = useState(false);
+  const [showHints, setShowHints] = useState(false);
   const drag = useRef<{ x: number; id: number } | null>(null);
 
   useEffect(() => {
@@ -76,6 +81,8 @@ export default function ShortsPage() {
       setDeck(r.cards);
       setNext({ page: r.page, hasMore: r.hasMore });
       setStatus(r.failed && !r.cards.length ? 'failed' : 'ready');
+      // First visit: a short tour, once the first card is on screen to point at.
+      if (r.cards.length && !hintsSeen()) setTimeout(() => !cancelled && setShowHints(true), TOUR_DELAY_MS);
     });
     return () => {
       cancelled = true;
@@ -122,6 +129,7 @@ export default function ShortsPage() {
   const save = () => {
     if (!current || leaving) return;
     addBookmark(current.a.id).catch(() => undefined);
+    playSave();
     flash('★ Saved');
     advance('right');
   };
@@ -172,10 +180,16 @@ export default function ShortsPage() {
       : undefined;
 
   return (
-    <div className="shorts">
+    // The first tap of a visit plays the welcome chime (browsers allow no sound before one).
+    <div className="shorts" onPointerDown={welcomeOnce}>
       <header className="page-head">
         <p className="eyebrow">Three minutes between cases</p>
-        <h1>Shorts</h1>
+        <h1 className="shorts-title">
+          Shorts
+          <button type="button" className="hint-replay" onClick={() => setShowHints(true)} disabled={!current} aria-label="How Shorts works" title="How Shorts works">
+            ?
+          </button>
+        </h1>
         <p className="lede">
           The newest free meta-analyses, systematic reviews, trials and guidelines, one card at a time. Swipe right
           to save, left to skip.
@@ -251,7 +265,7 @@ export default function ShortsPage() {
             <button type="button" className="btn" onClick={save} aria-label="Save (right arrow)">
               ★ Save
             </button>
-            <button type="button" className="btn btn-primary" onClick={read}>
+            <button type="button" className="btn btn-primary" onClick={read} data-hint="read">
               Read →
             </button>
             <ShareButton article={current.a} />
@@ -281,6 +295,7 @@ export default function ShortsPage() {
           </p>
         </div>
       )}
+      {showHints && current && <ShortsHints onDone={() => setShowHints(false)} />}
       {toast && (
         <div className="short-toast" role="status">
           {toast}

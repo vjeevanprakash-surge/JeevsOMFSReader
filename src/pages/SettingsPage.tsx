@@ -1,17 +1,20 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { resetHints } from '../lib/hints';
 import { APP_VERSION, CHANGELOG } from '../data/changelog';
 import { ReleaseCard } from './ChangelogPage';
 import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, specialtyOf } from '../data/journals';
 import { specialtyLabel } from '../data/specialties';
 import InstallBanner from '../components/InstallBanner';
 import MyTopicsPicker from '../components/MyTopicsPicker';
+import SoundToggle from '../components/SoundToggle';
 import { DEFAULT_PDF_PROXY } from '../lib/pdf';
 import { getSettings, saveSettings } from '../lib/settings';
 
 export default function SettingsPage() {
   const [s, setS] = useState(getSettings);
   const [saved, setSaved] = useState(false);
+  const navigate = useNavigate();
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -47,6 +50,20 @@ export default function SettingsPage() {
           Topics you follow come first in Shorts and get one-tap filters on Browse. Saved only on this device.
         </p>
         <MyTopicsPicker />
+      </section>
+      <section className="panel" aria-labelledby="sound-title">
+        <h2 id="sound-title">Sound and tips</h2>
+        <SoundToggle />
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            resetHints();
+            navigate('/');
+          }}
+        >
+          Show the Shorts tour again
+        </button>
       </section>
       <form className="settings panel" onSubmit={submit}>
         <label>

@@ -849,3 +849,38 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
 @keyframes kr-pop { from { transform: scale(0); } to { transform: scale(1); } }
 .quick-take .kr { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) { .kr-grow, .kr-grow-c, .kr-pop { animation: none; } }
+
+/* Shorts tour (components/ShortsHints.tsx) */
+.hints { position: fixed; inset: 0; z-index: 60; cursor: pointer; }
+.hint-spot {
+  position: fixed; border-radius: calc(var(--radius) + 6px); pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(4, 12, 20, 0.62), 0 0 0 2px var(--brand-2);
+  transition: left 0.3s var(--ease), top 0.3s var(--ease), width 0.3s var(--ease), height 0.3s var(--ease);
+}
+.hint-hand { position: absolute; left: 50%; top: 45%; font-size: 2.6rem; animation: hint-swipe 1.8s ease-in-out infinite; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4)); }
+@keyframes hint-swipe {
+  0%, 100% { transform: translateX(-50%); opacity: 0.2; }
+  20% { opacity: 1; }
+  45% { transform: translateX(-160%) rotate(-12deg); opacity: 1; }
+  55% { transform: translateX(-160%) rotate(-12deg); opacity: 0; }
+  60% { transform: translateX(-50%); opacity: 0; }
+  70% { opacity: 1; }
+  90% { transform: translateX(60%) rotate(12deg); opacity: 0; }
+}
+.hint-tip {
+  position: fixed; left: 50%; transform: translateX(-50%); width: min(92vw, 360px); padding: 16px 18px 14px;
+  border-radius: var(--radius); cursor: default; background: var(--glass-strong); animation: card-in 0.3s var(--ease) both;
+}
+.hint-tip h2 { margin: 2px 0 6px; font-size: 1.15rem; }
+.hint-tip p { margin: 0; line-height: 1.5; }
+.hint-step { font-size: 0.78rem; font-weight: 700; color: var(--brand-2); letter-spacing: 0.04em; text-transform: uppercase; }
+.hint-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.shorts-title { display: flex; align-items: center; gap: 10px; }
+.hint-replay {
+  width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--glass);
+  color: var(--ink-2); font-weight: 800; font-size: 0.9rem; cursor: pointer;
+}
+.hint-replay:disabled { opacity: 0.4; cursor: default; }
+.toggle { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; cursor: pointer; line-height: 1.45; }
+.toggle input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--brand-2); flex: none; }
+@media (prefers-reduced-motion: reduce) { .hint-hand { animation: none; } .hint-spot { transition: none; } }
