@@ -12,6 +12,18 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.14',
+    date: '2026-11-03',
+    title: 'Shorts: the best new evidence, one card at a time',
+    changes: [
+      'Shorts (⚡ in the tab bar): the newest free meta-analyses, systematic reviews, trials and guidelines as cards. Each shows the authors’ conclusion in about 60 words and the key number (a hazard ratio, a percentage, the sample size). Swipe right to save, left to skip, or tap Read.',
+      'Your reading on the Stats page: a daily streak, papers read today and the last 7 days. Read papers get a “✓ Read” tag.',
+      'My topics (in Settings): topics you follow come first in Shorts and get one-tap filters on Browse.',
+      'Share any paper from its page or from Shorts.',
+      'All of this stays on your device: no account needed.',
+    ],
+  },
+  {
     version: '1.13',
     date: '2026-10-28',
     title: 'Papers PubMed hasn’t caught up with',

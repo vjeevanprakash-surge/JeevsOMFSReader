@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { formatDate } from '../lib/format';
 import { loadArticle } from '../lib/article';
 import { loadFullText, NotAvailable, type Block, type FullText, type Inline, type Reference, type Section } from '../lib/fulltext';
+import { markRead } from '../lib/reads';
 import { articlePath, parseArticleId } from '../lib/routes';
 import type { Article } from '../lib/types';
 
@@ -49,7 +50,11 @@ export default function ReaderPage() {
     if (!article?.pmcid) return;
     let cancelled = false;
     loadFullText(article.id, article.pmcid)
-      .then((d) => !cancelled && setDoc(d))
+      .then((d) => {
+        if (cancelled) return;
+        setDoc(d);
+        void markRead(article.id);
+      })
       .catch((e) => !cancelled && setError(e instanceof NotAvailable ? 'none' : navigator.onLine ? 'other' : 'offline'));
     return () => {
       cancelled = true;

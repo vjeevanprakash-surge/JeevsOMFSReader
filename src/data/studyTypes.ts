@@ -63,6 +63,10 @@ export const STUDY_TYPES: StudyType[] = [
 
 export const studyTypeById = (id?: string) => STUDY_TYPES.find((t) => t.id === id);
 
+/** Meta-analyses, systematic reviews, RCTs and guidelines: what Shorts shows. */
+export const isHighEvidence = (id?: string) => studyTypeById(id)?.tier === 'high';
+export const HIGH_EVIDENCE_QUERY = `(${STUDY_TYPES.filter((t) => t.tier === 'high').map((t) => t.query).join(' OR ')})`;
+
 /**
  * PubMed filter for one study type that agrees with the badges: the type's own query, minus
  * anything that qualifies as a stronger type (e.g. RCT excludes meta-analyses of randomized trials).

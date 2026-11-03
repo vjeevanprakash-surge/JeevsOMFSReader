@@ -3,7 +3,9 @@ import { journalById, REGIONS, specialtyOf } from '../data/journals';
 import { SPECIALTIES } from '../data/specialties';
 import { STUDY_TYPES } from '../data/studyTypes';
 import { OTHER_TOPIC, TOPICS } from '../data/topics';
-import { allArticles, bookmarkedArticles, pdfIds } from '../lib/db';
+import { Link } from 'react-router-dom';
+import { allArticles, allReads, bookmarkedArticles, pdfIds } from '../lib/db';
+import { readingStats, type ReadingStats } from '../lib/reads';
 import type { Article } from '../lib/types';
 
 function count<T extends string | number>(items: T[]) {
@@ -36,14 +38,53 @@ function Bars({ title, rows }: { title: string; rows: [string, number][] }) {
   );
 }
 
+const WEEKDAY = new Intl.DateTimeFormat(undefined, { weekday: 'narrow' });
+
+/** Streak, today and the last 7 days: papers opened (10 s on the page), read in the app, or opened from Shorts. */
+function ReadingPanel({ r }: { r: ReadingStats }) {
+  const max = Math.max(1, ...r.week.map((d) => d.count));
+  return (
+    <section className="panel reading" aria-labelledby="reading-title">
+      <h2 id="reading-title">Your reading</h2>
+      <div className="reading-row">
+        <div className="reading-streak">
+          <span className="tile-value">{r.streak ? `🔥 ${r.streak}` : '0'}</span>
+          <span className="tile-label">day streak</span>
+        </div>
+        <div>
+          <span className="tile-value">{r.today}</span>
+          <span className="tile-label">read today</span>
+        </div>
+        <div>
+          <span className="tile-value">{r.total}</span>
+          <span className="tile-label">read in all</span>
+        </div>
+        <ol className="week" aria-label="Papers read in the last 7 days">
+          {r.week.map((d) => (
+            <li key={d.day} title={`${new Date(d.day).toDateString()}: ${d.count}`}>
+              <span className="week-bar" style={{ height: `${(d.count / max) * 100}%` }} />
+              <span className="week-day">{WEEKDAY.format(d.day)}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      {!r.total && (
+        <p className="muted">
+          Papers you open count here. Try <Link to="/shorts">Shorts</Link> for three minutes of new evidence.
+        </p>
+      )}
+    </section>
+  );
+}
+
 export default function StatsPage() {
-  const [data, setData] = useState<{ all: Article[]; saved: Article[]; pdfs: number } | null>(null);
+  const [data, setData] = useState<{ all: Article[]; saved: Article[]; pdfs: number; reading: ReadingStats } | null>(null);
   const [scope, setScope] = useState<'all' | 'saved'>('all');
 
   useEffect(() => {
-    Promise.all([allArticles(), bookmarkedArticles(), pdfIds()])
-      .then(([all, saved, pdfs]) => setData({ all, saved, pdfs: pdfs.length }))
-      .catch(() => setData({ all: [], saved: [], pdfs: 0 }));
+    Promise.all([allArticles(), bookmarkedArticles(), pdfIds(), allReads()])
+      .then(([all, saved, pdfs, reads]) => setData({ all, saved, pdfs: pdfs.length, reading: readingStats(reads) }))
+      .catch(() => setData({ all: [], saved: [], pdfs: 0, reading: readingStats([]) }));
   }, []);
 
   if (!data) return <p className="empty">Loading…</p>;
@@ -69,6 +110,7 @@ export default function StatsPage() {
           </button>
         </div>
       </div>
+      <ReadingPanel r={data.reading} />
       <div className="tiles">
         <div className="tile">
           <span className="tile-value">{data.all.length}</span>

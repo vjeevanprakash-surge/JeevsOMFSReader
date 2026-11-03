@@ -5,6 +5,7 @@ import { ReleaseCard } from './ChangelogPage';
 import { ACCESS_TIERS, accessTier, byFreeAccess, JOURNALS, specialtyOf } from '../data/journals';
 import { specialtyLabel } from '../data/specialties';
 import InstallBanner from '../components/InstallBanner';
+import MyTopicsPicker from '../components/MyTopicsPicker';
 import { DEFAULT_PDF_PROXY } from '../lib/pdf';
 import { getSettings, saveSettings } from '../lib/settings';
 
@@ -39,6 +40,13 @@ export default function SettingsPage() {
         <Link className="btn whats-new-all" to="/changelog">
           Version history ({CHANGELOG.length} versions) →
         </Link>
+      </section>
+      <section className="panel" aria-labelledby="my-topics-title">
+        <h2 id="my-topics-title">My topics</h2>
+        <p className="muted">
+          Topics you follow come first in Shorts and get one-tap filters on Browse. Saved only on this device.
+        </p>
+        <MyTopicsPicker />
       </section>
       <form className="settings panel" onSubmit={submit}>
         <label>

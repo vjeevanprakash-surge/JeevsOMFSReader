@@ -376,3 +376,68 @@ describe('PubMed gap fill', async () => {
     expect(await pubmedGap([journalById('ijoms')!], { page: 0 }, Date.parse('2026-10-28'))).toEqual([]); // not lagging
   });
 });
+
+describe('quickTake', async () => {
+  const { quickTake, keyNumber } = await import('./quicktake');
+  const filler = 'This sentence pads the abstract out so it reads like a real one with enough words. ';
+
+  it('takes the conclusion of a structured abstract', () => {
+    const q = quickTake(parsePubmedXml(xml)[0])!;
+    expect(q.text).toMatch(/^Under in-vitro conditions, all IOS digitized neonatal maxillary anatomy/);
+    expect(q.text.split(/\s+/).length).toBeLessThanOrEqual(75);
+  });
+
+  it('finds the key number: effect size with CI, then % comparison, accuracy, sample size', () => {
+    expect(keyNumber('Disease-free survival improved (OR 0.53, 95% CI 0.41–0.69; p < 0.001).')).toBe('OR 0.53 (95% CI 0.41–0.69)');
+    expect(keyNumber('Overall survival was unchanged (HR = 1.06).')).toBe('HR 1.06');
+    expect(keyNumber('Major response was 35% vs 17% with monotherapy.')).toBe('35% vs 17%');
+    expect(keyNumber('The model reached an AUC of 0.91 in validation.')).toBe('AUC 0.91');
+    expect(keyNumber('We reviewed 1,234 patients treated over ten years.')).toBe('1,234 patients');
+    expect(keyNumber('No figures here.')).toBeUndefined();
+  });
+
+  it('prefers the Results section for the number', () => {
+    const q = quickTake({
+      abstract: `METHODS: We enrolled 400 patients. ${filler}\n\nRESULTS: Recurrence fell (HR 0.62, 95% CI 0.48 to 0.80). ${filler}\n\nCONCLUSIONS: Adjuvant therapy lowers recurrence.`,
+    })!;
+    expect(q.keyNumber).toBe('HR 0.62 (95% CI 0.48–0.80)');
+    expect(q.text).toBe('Adjuvant therapy lowers recurrence.');
+  });
+
+  it('uses the last two sentences of an unstructured abstract, and needs an abstract', () => {
+    const q = quickTake({ abstract: `${filler.repeat(3)}Flap survival was 97% vs. 91% in the two groups. Early monitoring is advised.` })!;
+    expect(q.text).toBe('Flap survival was 97% vs. 91% in the two groups. Early monitoring is advised.');
+    expect(q.keyNumber).toBe('97% vs 91%');
+    expect(quickTake({ abstract: '' })).toBeUndefined();
+    expect(quickTake({ abstract: 'Too short to summarise.' })).toBeUndefined();
+  });
+});
+
+describe('reading stats', async () => {
+  const { readingStats } = await import('./reads');
+  const now = new Date(2026, 10, 3, 15).getTime();
+  const day = (n: number, h = 10) => ({ at: new Date(2026, 10, 3 - n, h).getTime() });
+
+  it('counts a streak of consecutive days, alive until a day is missed', () => {
+    expect(readingStats([day(0), day(0, 12), day(1), day(2), day(4)], now)).toMatchObject({ total: 5, today: 2, streak: 3 });
+    expect(readingStats([day(1), day(2)], now).streak).toBe(2); // nothing yet today: still alive
+    expect(readingStats([day(2), day(3)], now).streak).toBe(0); // yesterday missed
+    expect(readingStats([], now)).toMatchObject({ total: 0, today: 0, streak: 0 });
+  });
+
+  it('gives the last 7 days, oldest first', () => {
+    const w = readingStats([day(0), day(6), day(7)], now).week;
+    expect(w).toHaveLength(7);
+    expect(w.map((d) => d.count)).toEqual([1, 0, 0, 0, 0, 0, 1]);
+  });
+});
+
+describe('high evidence', async () => {
+  const { buildPubmedTerm } = await import('./pubmed');
+  it('narrows PubMed to meta-analyses, systematic reviews, RCTs and guidelines', () => {
+    const term = buildPubmedTerm([journalById('joms')!], { page: 0, evidence: 'high' });
+    expect(term).toContain('"meta-analysis"[pt]');
+    expect(term).toContain('"randomized controlled trial"[pt]');
+    expect(term).not.toContain('"case reports"[pt]');
+  });
+});

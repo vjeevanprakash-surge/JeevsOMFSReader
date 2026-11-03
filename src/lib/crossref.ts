@@ -1,5 +1,5 @@
 import { journalByIssn } from '../data/journals';
-import { detectStudyType } from '../data/studyTypes';
+import { detectStudyType, isHighEvidence } from '../data/studyTypes';
 import { classify, topicById } from '../data/topics';
 import { limitedFetch } from './http';
 import { getSettings } from './settings';
@@ -132,6 +132,7 @@ async function crossrefPage(journals: Journal[], q: ArticleQuery, rows: number, 
     if (topic) articles = articles.filter((a) => a.topics.includes(topic.label));
     if (q.freeOnly) articles = articles.filter((a) => a.isOpenAccess);
     if (q.studyType) articles = articles.filter((a) => a.studyType === q.studyType);
+    if (q.evidence === 'high') articles = articles.filter((a) => isHighEvidence(a.studyType));
     return { articles, total: (json.message['total-results'] as number) ?? 0, errors: [] as string[] };
   } catch (e) {
     return { articles: [] as Article[], total: 0, errors: [`Crossref: ${(e as Error).message}`] };

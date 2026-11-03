@@ -11,12 +11,14 @@ import ClassicsPage from './pages/ClassicsPage';
 import ReaderPage from './pages/ReaderPage';
 import SavedPage from './pages/SavedPage';
 import SearchPage from './pages/SearchPage';
+import ShortsPage from './pages/ShortsPage';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
 import { APP_NAME, TAGLINE } from './data/brand';
 
 const NAV = [
   { to: '/', label: 'Browse', icon: '▦' },
+  { to: '/shorts', label: 'Shorts', icon: '⚡' },
   { to: '/search', label: 'Search', icon: '⌕' },
   { to: '/classics', label: 'Classics', icon: '❖' },
   { to: '/saved', label: 'Saved', icon: '★' },
@@ -163,6 +165,7 @@ function Shell() {
         <div className="page" key={pathname}>
           <Routes>
             <Route path="/" element={<BrowsePage />} />
+            <Route path="/shorts" element={<ShortsPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/article/*" element={<ArticlePage />} />
             <Route path="/read/*" element={<ReaderPage />} />

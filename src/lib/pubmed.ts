@@ -1,5 +1,5 @@
 import { journalByIssn } from '../data/journals';
-import { detectStudyType, studyTypeQuery } from '../data/studyTypes';
+import { detectStudyType, HIGH_EVIDENCE_QUERY, studyTypeQuery } from '../data/studyTypes';
 import { relevanceFor, viewOf } from '../data/journals';
 import { classify, topicById } from '../data/topics';
 import { limitedFetch } from './http';
@@ -38,6 +38,7 @@ export function buildPubmedTerm(journals: Journal[], q: ArticleQuery): string {
   if (q.freeOnly) parts.push(FREE_FILTER);
   const type = q.studyType ? studyTypeQuery(q.studyType) : undefined;
   if (type) parts.push(type);
+  if (q.evidence === 'high') parts.push(HIGH_EVIDENCE_QUERY);
   return parts.join(' AND ');
 }
 

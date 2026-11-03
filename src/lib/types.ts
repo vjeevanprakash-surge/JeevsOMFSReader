@@ -87,6 +87,8 @@ export interface ArticleQuery {
   freeOnly?: boolean;
   /** Study type id (data/studyTypes.ts). */
   studyType?: string;
+  /** 'high': meta-analyses, systematic reviews, RCTs and guidelines only (Shorts). */
+  evidence?: 'high';
   /** Search order; default newest. */
   sort?: 'newest' | 'relevance';
   page: number;

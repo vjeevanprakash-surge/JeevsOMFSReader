@@ -10,11 +10,15 @@ interface OmfsDB extends DBSchema {
   queries: { key: string; value: { key: string; ids: string[]; total: number; hasMore: boolean; at: number } };
   /** Full text opened in the reader, kept for offline reading. */
   fulltext: { key: string; value: { id: string; doc: FullText; savedAt: number } };
+  /** Papers read on this device (article page, reader, Shorts), for the streak and "Read" tags. */
+  reads: { key: string; value: { id: string; at: number } };
+  /** Papers skipped in Shorts, so they don't come back. */
+  skips: { key: string; value: { id: string; at: number } };
 }
 
 let dbp: Promise<IDBPDatabase<OmfsDB>> | undefined;
 const db = () =>
-  (dbp ??= openDB<OmfsDB>('omfs-reader', 3, {
+  (dbp ??= openDB<OmfsDB>('omfs-reader', 4, {
     upgrade(d, oldVersion) {
       if (oldVersion < 1) {
         d.createObjectStore('articles', { keyPath: 'id' });
@@ -23,6 +27,10 @@ const db = () =>
       }
       if (oldVersion < 2) d.createObjectStore('queries', { keyPath: 'key' });
       if (oldVersion < 3) d.createObjectStore('fulltext', { keyPath: 'id' });
+      if (oldVersion < 4) {
+        d.createObjectStore('reads', { keyPath: 'id' });
+        d.createObjectStore('skips', { keyPath: 'id' });
+      }
     },
   }));
 
@@ -75,4 +83,22 @@ export async function cachedQueryResult(key: string) {
   if (!q) return undefined;
   const articles = (await Promise.all(q.ids.map((id) => d.get('articles', id)))).filter(Boolean) as Article[];
   return { articles, total: q.total, hasMore: q.hasMore };
+}
+
+/** Records a read; the first read of a paper keeps its time (the streak counts days, not repeats). */
+export async function saveRead(id: string, at = Date.now()) {
+  const d = await db();
+  if (!(await d.get('reads', id))) await d.put('reads', { id, at });
+}
+export const allReads = async () => (await db()).getAll('reads');
+
+const SKIP_DAYS = 30;
+export const addSkip = async (id: string) => (await db()).put('skips', { id, at: Date.now() });
+/** Papers skipped in the last 30 days (older skips are dropped). */
+export async function skipIds(): Promise<Set<string>> {
+  const d = await db();
+  const cutoff = Date.now() - SKIP_DAYS * 864e5;
+  const all = await d.getAll('skips');
+  for (const s of all) if (s.at < cutoff) await d.delete('skips', s.id);
+  return new Set(all.filter((s) => s.at >= cutoff).map((s) => s.id));
 }

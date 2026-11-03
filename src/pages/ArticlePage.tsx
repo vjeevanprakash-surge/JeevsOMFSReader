@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { formatDate } from '../lib/format';
 import BookmarkButton from '../components/BookmarkButton';
+import ShareButton from '../components/ShareButton';
 import StudyBadge from '../components/StudyBadge';
 import { journalById } from '../data/journals';
 import { downloadText, toBibtex, toVancouver } from '../lib/citation';
 import { canReadInApp, loadArticle } from '../lib/article';
 import { deletePdf, getPdf } from '../lib/db';
 import { canCachePdf, downloadPdf, isNew, openCachedPdf } from '../lib/pdf';
+import { markRead } from '../lib/reads';
 import { parseArticleId, readerPath } from '../lib/routes';
 import type { Article } from '../lib/types';
+
+const READ_AFTER_MS = 10_000;
 
 export default function ArticlePage() {
   const id = parseArticleId(useParams()['*']);
@@ -24,6 +28,13 @@ export default function ArticlePage() {
     if (passed?.id !== id) loadArticle(id).then((x) => setA(x ?? null)).catch(() => setA(null));
     getPdf(id).then((p) => setHasPdf(!!p)).catch(() => undefined);
   }, [id, passed]);
+
+  // Ten seconds on the page counts as reading it (for the streak and the "Read" tags).
+  useEffect(() => {
+    if (!a) return;
+    const t = setTimeout(() => void markRead(a.id), READ_AFTER_MS);
+    return () => clearTimeout(t);
+  }, [a]);
 
   if (a === undefined) return <p className="empty">Loading…</p>;
   if (a === null)
@@ -134,6 +145,7 @@ export default function ArticlePage() {
             PubMed
           </a>
         )}
+        <ShareButton article={a} />
       </div>
       {pdfState !== 'idle' && pdfState !== 'busy' && (
         <p className="errors">

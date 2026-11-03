@@ -4,6 +4,7 @@ import { journalById } from '../data/journals';
 import { isNew } from '../lib/pdf';
 import { articlePath } from '../lib/routes';
 import { formatDate, shortAuthors } from '../lib/format';
+import { useReadIds } from '../lib/reads';
 import type { Article } from '../lib/types';
 import BookmarkButton from './BookmarkButton';
 import StudyBadge from './StudyBadge';
@@ -12,6 +13,7 @@ import StudyBadge from './StudyBadge';
 /** `note`: an optional line shown under the title (e.g. why a classic paper matters). */
 export default function ArticleCard({ article: a, index = 0, note }: { article: Article; index?: number; note?: string }) {
   const region = journalById(a.journalId)?.region;
+  const read = useReadIds().has(a.id);
   return (
     <article
       className={`card ${a.isOpenAccess ? 'card-free' : 'card-paid'}`}
@@ -23,6 +25,7 @@ export default function ArticleCard({ article: a, index = 0, note }: { article: 
         </span>
         <StudyBadge type={a.studyType} />
         {isNew(a) && <span className="badge-new">New</span>}
+        {read && <span className="badge-read">✓ Read</span>}
         <BookmarkButton id={a.id} />
       </div>
       <h3 className="card-title">
