@@ -8,6 +8,9 @@ import type { Article } from './types';
 export interface QuickTake {
   text: string;
   keyNumber?: string;
+  result?: KeyResult;
+  /** The sentence the key number comes from. */
+  context?: string;
 }
 
 const MAX_WORDS = 60;
@@ -65,23 +68,58 @@ const SAMPLE =
 const N_EQUALS = /\bn\s*=\s*(\d[\d,]*)/i;
 
 const dash = (s: string) => s.replace(/^[−–]/, '-');
+const num = (s: string) => Number(dash(s));
+
+/** The key number, structured so it can be drawn (components/KeyResultChart.tsx). */
+export type KeyResult = (
+  | { kind: 'effect'; measure: string; value: number; lo?: number; hi?: number }
+  | { kind: 'compare'; a: number; b: number }
+  | { kind: 'accuracy'; measure: string; value: number; percent: boolean }
+  | { kind: 'count'; n: string; noun: string }
+) & {
+  /** As written in the abstract, e.g. "OR 0.53 (95% CI 0.41–0.69)". */
+  label: string;
+};
+
+/** The sentence a match sits in, as context for a chart. */
+export interface Found {
+  result: KeyResult;
+  sentence: string;
+}
+
+function sentenceAround(text: string, at: number) {
+  const start = Math.max(text.lastIndexOf('. ', at) + 2, 0);
+  const end = text.indexOf('. ', at);
+  return text.slice(start === 1 ? 0 : start, end < 0 ? undefined : end + 1).trim();
+}
 
 /** The most telling number in a passage: an effect size, a % comparison, an accuracy figure, or the sample size. */
-export function keyNumber(text: string): string | undefined {
+export function findKeyResult(text: string): Found | undefined {
   let m = EFFECT.exec(text);
+  const found = (result: KeyResult): Found => ({ result, sentence: sentenceAround(text, m!.index) });
   if (m) {
-    const ci = m[3] !== undefined ? ` (95% CI ${dash(m[3])}–${dash(m[4])})` : '';
-    return `${m[1]} ${dash(m[2])}${ci}`;
+    const ci = m[3] !== undefined ? { lo: num(m[3]), hi: num(m[4]) } : {};
+    const label = `${m[1]} ${dash(m[2])}${m[3] !== undefined ? ` (95% CI ${dash(m[3])}–${dash(m[4])})` : ''}`;
+    return found({ kind: 'effect', measure: m[1], value: num(m[2]), ...ci, label });
   }
-  if ((m = PERCENTS.exec(text))) return `${m[1]}% vs ${m[2]}%`;
+  if ((m = PERCENTS.exec(text))) return found({ kind: 'compare', a: Number(m[1]), b: Number(m[2]), label: `${m[1]}% vs ${m[2]}%` });
   if ((m = ACCURACY.exec(text))) {
-    const label = /area under/i.test(m[1]) ? 'AUC' : m[1].toUpperCase() === 'AUC' ? 'AUC' : m[1].toLowerCase();
-    return `${label} ${m[2].replace(/\s+/g, '')}`;
+    const measure = /area under|auc/i.test(m[1]) ? 'AUC' : m[1].toLowerCase();
+    const v = m[2].replace(/\s+/g, '');
+    return found({ kind: 'accuracy', measure, value: parseFloat(v), percent: v.includes('%'), label: `${measure} ${v}` });
   }
-  if ((m = SAMPLE.exec(text))) return `${m[1]} ${m[2].toLowerCase()}`;
-  if ((m = N_EQUALS.exec(text))) return `${m[1]} participants`;
+  if ((m = SAMPLE.exec(text))) return found({ kind: 'count', n: m[1], noun: m[2].toLowerCase(), label: `${m[1]} ${m[2].toLowerCase()}` });
+  if ((m = N_EQUALS.exec(text))) return found({ kind: 'count', n: m[1], noun: 'participants', label: `${m[1]} participants` });
   return undefined;
 }
+
+/** Sample sizes aren't drawn: the number says it all. */
+export const canChart = (r?: KeyResult) => !!r && r.kind !== 'count';
+
+export const keyNumber = (text: string) => {
+  const f = findKeyResult(text);
+  return f?.result.label;
+};
 
 export function quickTake(a: Pick<Article, 'abstract'>): QuickTake | undefined {
   const abstract = a.abstract?.trim();
@@ -92,5 +130,6 @@ export function quickTake(a: Pick<Article, 'abstract'>): QuickTake | undefined {
   const parts = sentences(body);
   const text = trimToWords(conclusion ? parts : parts.slice(-2));
   const results = secs.filter((s) => RESULTS.test(s.label)).map((s) => s.text).join(' ');
-  return { text, keyNumber: (results && keyNumber(results)) || keyNumber(abstract) };
+  const found = (results && findKeyResult(results)) || findKeyResult(abstract);
+  return found ? { text, keyNumber: found.result.label, result: found.result, context: found.sentence } : { text };
 }

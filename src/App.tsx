@@ -13,6 +13,7 @@ import SavedPage from './pages/SavedPage';
 import SearchPage from './pages/SearchPage';
 import ShortsPage from './pages/ShortsPage';
 import { homeRedirect } from './lib/routes';
+import { hideSplash } from './lib/splash';
 import SettingsPage from './pages/SettingsPage';
 import StatsPage from './pages/StatsPage';
 import { APP_NAME, TAGLINE } from './data/brand';
@@ -128,6 +129,8 @@ function Shell() {
   useEffect(() => {
     window.scrollTo(0, 0);
     onNavigate();
+    // Shorts hides the splash at its first card; other pages have content straight away.
+    if (pathname !== '/') hideSplash();
   }, [pathname]);
 
   return (

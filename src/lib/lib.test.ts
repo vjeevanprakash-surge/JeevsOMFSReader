@@ -451,3 +451,15 @@ describe('home page', async () => {
     expect(homeRedirect('?topic=oncology')).toBe('/browse?topic=oncology');
   });
 });
+
+describe('key result for charts', async () => {
+  const { findKeyResult } = await import('./quicktake');
+  it('gives numbers to draw, the label as written, and the sentence around it', () => {
+    const f = findKeyResult('Methods were standard. Survival improved (HR 0.62, 95% CI 0.48 to 0.80). More text.')!;
+    expect(f.result).toMatchObject({ kind: 'effect', measure: 'HR', value: 0.62, lo: 0.48, hi: 0.8, label: 'HR 0.62 (95% CI 0.48–0.80)' });
+    expect(f.sentence).toBe('Survival improved (HR 0.62, 95% CI 0.48 to 0.80).');
+    expect(findKeyResult('Response was 35% vs 17%.')!.result).toMatchObject({ kind: 'compare', a: 35, b: 17 });
+    expect(findKeyResult('Sensitivity was 92% overall.')!.result).toMatchObject({ kind: 'accuracy', measure: 'sensitivity', value: 92, percent: true });
+    expect(findKeyResult('MD -1.2 (95% CI -2.0 to -0.4) in pain scores.')!.result).toMatchObject({ value: -1.2, lo: -2, hi: -0.4 });
+  });
+});

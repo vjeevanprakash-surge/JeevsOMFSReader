@@ -820,3 +820,32 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
   .short-actions .btn { white-space: nowrap; font-size: 0.88rem; padding-inline: 4px; gap: 4px; }
   .shorts .lede { font-size: 0.95rem; }
 }
+
+/* Key result charts (components/KeyResultChart.tsx) */
+.kr { margin: 4px 0 12px; padding: 10px 12px 8px; border-radius: 12px; background: color-mix(in srgb, var(--brand-2) 7%, transparent); border: 1px solid var(--line); }
+.kr-head { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink-2); margin-bottom: 4px; }
+.kr-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.kr-svg text { font-family: var(--font-display); fill: var(--ink-2); }
+.kr-svg .kr-value { font-size: 13px; font-weight: 800; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.kr-svg .kr-tick { font-size: 10.5px; }
+.kr-axis { stroke: var(--line); stroke-width: 2; }
+.kr-nil { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.7; }
+.kr-ci { fill: color-mix(in srgb, var(--ink-2) 45%, transparent); }
+.kr-ci.is-clear { fill: color-mix(in srgb, var(--free) 55%, transparent); }
+.kr-dot { fill: var(--ink-2); stroke: var(--surface); stroke-width: 2; }
+.kr-dot.is-clear { fill: var(--free); }
+.kr-track { fill: color-mix(in srgb, var(--ink-2) 14%, transparent); }
+.kr-bar-a { fill: var(--brand-2); }
+.kr-bar-b { fill: color-mix(in srgb, var(--brand-2) 45%, var(--ink-2)); }
+.kr-verdict { margin: 2px 0 0; font-size: 0.84rem; font-weight: 600; color: var(--ink); }
+.kr-context {
+  margin: 4px 0 0; font-size: 0.82rem; color: var(--ink-2); line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.kr-grow, .kr-grow-c { transform-box: fill-box; transform-origin: left center; animation: kr-grow 0.8s var(--ease) both; }
+.kr-grow-c { transform-origin: center; }
+.kr-pop { transform-box: fill-box; transform-origin: center; animation: kr-pop 0.5s var(--spring) 0.45s both; }
+@keyframes kr-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes kr-pop { from { transform: scale(0); } to { transform: scale(1); } }
+.quick-take .kr { margin-top: 0; }
+@media (prefers-reduced-motion: reduce) { .kr-grow, .kr-grow-c, .kr-pop { animation: none; } }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { formatDate } from '../lib/format';
 import BookmarkButton from '../components/BookmarkButton';
+import KeyResultChart from '../components/KeyResultChart';
 import ShareButton from '../components/ShareButton';
 import StudyBadge from '../components/StudyBadge';
 import { journalById } from '../data/journals';
@@ -9,6 +10,7 @@ import { downloadText, toBibtex, toVancouver } from '../lib/citation';
 import { canReadInApp, loadArticle } from '../lib/article';
 import { deletePdf, getPdf } from '../lib/db';
 import { canCachePdf, downloadPdf, isNew, openCachedPdf } from '../lib/pdf';
+import { quickTake } from '../lib/quicktake';
 import { markRead } from '../lib/reads';
 import { parseArticleId, readerPath } from '../lib/routes';
 import type { Article } from '../lib/types';
@@ -45,6 +47,7 @@ export default function ArticlePage() {
     );
 
   const journal = journalById(a.journalId);
+  const take = quickTake(a);
   const fileBase = `${a.authors[0]?.last ?? 'article'}-${a.year}`.replace(/[^\w-]/g, '');
 
   const savePdf = async () => {
@@ -156,6 +159,16 @@ export default function ArticlePage() {
             </a>
           )}
         </p>
+      )}
+
+      {take && (
+        <section className="abstract quick-take" aria-labelledby="quick-take-title">
+          <h2 id="quick-take-title">Quick take</h2>
+          <KeyResultChart result={take.result} context={take.context} />
+          {!take.result || take.result.kind === 'count' ? take.keyNumber && <p className="short-number">{take.keyNumber}</p> : null}
+          <p>{take.text}</p>
+          <p className="muted">From the authors’ abstract.</p>
+        </section>
       )}
 
       <section className="abstract">

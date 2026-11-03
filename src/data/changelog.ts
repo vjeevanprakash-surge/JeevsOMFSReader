@@ -12,6 +12,16 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.16',
+    date: '2026-11-03',
+    title: 'Key results you can see, and a proper welcome',
+    changes: [
+      'Key result charts on Shorts cards and a new Quick take panel on every paper: hazard and odds ratios as a mini forest plot that tells you whether the confidence interval crosses “no difference”, two percentages as bars, and AUC or sensitivity as a gauge. Drawn from the figures in the abstract.',
+      'A branded welcome screen while the app loads, including on iPhone and Android home-screen apps.',
+      'Links you share now show a Jeevs OMFS Reader preview card in WhatsApp, iMessage and LinkedIn.',
+    ],
+  },
+  {
     version: '1.15',
     date: '2026-11-03',
     title: 'The app opens on Shorts',

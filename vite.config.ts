@@ -45,7 +45,7 @@ export default defineConfig({
         scope: './',
         categories: ['education', 'medical', 'books'],
         theme_color: '#0f3b5f',
-        background_color: '#f4f7fa',
+        background_color: '#0f3b5f',
         display: 'standalone',
         start_url: '.',
         icons: [
@@ -62,6 +62,8 @@ export default defineConfig({
         clientsClaim: true,
         // App shell plus the Latin font files, so the installed app looks the same offline.
         globPatterns: ['**/*.{js,css,html,svg,png,ico}', 'assets/*-latin-*.woff2', 'assets/*-latin-ext-*.woff2'],
+        // iPhone launch screens (fetched once when installing) and the link-preview card aren't needed offline.
+        globIgnores: ['splash/**', 'og-image.png'],
         runtimeCaching: [
           {
             // Figure images in the reader: kept once seen, so opened papers read well offline.

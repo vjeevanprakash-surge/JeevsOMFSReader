@@ -5,6 +5,7 @@ import './index.css'
 // Registers the install-prompt listener before React renders.
 import './lib/install'
 import './lib/update'
+import './lib/splash'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

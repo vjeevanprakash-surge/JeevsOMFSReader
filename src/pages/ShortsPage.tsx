@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import KeyResultChart from '../components/KeyResultChart';
 import ShareButton from '../components/ShareButton';
 import StudyBadge from '../components/StudyBadge';
 import { DEFAULT_SPECIALTY, SPECIALTIES } from '../data/specialties';
@@ -8,8 +9,9 @@ import { addBookmark, addSkip, skipIds } from '../lib/db';
 import { formatDate } from '../lib/format';
 import { myTopicLabels } from '../lib/mytopics';
 import { runQuery } from '../lib/query';
-import { quickTake, type QuickTake } from '../lib/quicktake';
+import { canChart, quickTake, type QuickTake } from '../lib/quicktake';
 import { loadReadIds, markRead } from '../lib/reads';
+import { hideSplash } from '../lib/splash';
 import { articlePath } from '../lib/routes';
 import type { Article, SpecialtyId } from '../lib/types';
 
@@ -69,6 +71,7 @@ export default function ShortsPage() {
   useEffect(() => {
     let cancelled = false;
     fill(spec, 0, new Set()).then((r) => {
+      hideSplash();
       if (cancelled) return;
       setDeck(r.cards);
       setNext({ page: r.page, hasMore: r.hasMore });
@@ -229,7 +232,11 @@ export default function ShortsPage() {
                 {current.mine && <span className="badge-new">My topic</span>}
               </div>
               <h2 className="short-title">{current.a.title}</h2>
-              {current.take.keyNumber && <p className="short-number">{current.take.keyNumber}</p>}
+              {canChart(current.take.result) ? (
+                <KeyResultChart result={current.take.result} context={current.take.context} />
+              ) : (
+                current.take.keyNumber && <p className="short-number">{current.take.keyNumber}</p>
+              )}
               <p className="short-take">{current.take.text}</p>
               <p className="short-meta">
                 <span className="journal">{current.a.journalAbbr}</span> · {formatDate(current.a.pubDate)} · from the
