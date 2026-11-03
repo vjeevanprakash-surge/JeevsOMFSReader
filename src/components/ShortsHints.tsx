@@ -45,12 +45,16 @@ export default function ShortsHints({ onDone }: { onDone: () => void }) {
     // Again once the card has finished sliding in.
     const settled = setTimeout(update, 450);
     el.addEventListener('animationend', update);
+    // And when the layout moves it (e.g. the update banner is dismissed).
+    const sized = new ResizeObserver(update);
+    sized.observe(el);
     window.addEventListener('resize', update);
     window.addEventListener('scroll', update, true);
     return () => {
       cancelAnimationFrame(frame);
       clearTimeout(settled);
       el.removeEventListener('animationend', update);
+      sized.disconnect();
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
     };

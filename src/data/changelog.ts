@@ -12,6 +12,14 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.19',
+    date: '2026-11-03',
+    title: 'Update news as a banner',
+    changes: [
+      'After each update, a slim banner under the header says what’s new, instead of a floating pill that could sit on top of the Shorts tour. It stays until you close it or open What’s new.',
+    ],
+  },
+  {
     version: '1.18',
     date: '2026-11-03',
     title: 'Shorts fits your phone',

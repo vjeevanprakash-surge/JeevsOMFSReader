@@ -716,16 +716,16 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
   .sheet, .sheet-backdrop, .skeleton-line { animation: none; }
 }
 
-/* New-version notice: a pill under the header. */
+/* New-version notice: a banner across the top of the page, under the header. */
 .update-notice {
-  position: fixed; z-index: 30; left: 50%; top: calc(var(--header-h) + 10px); transform: translateX(-50%);
-  display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 16px; border-radius: 999px;
-  font-size: 0.9rem; font-weight: 600; white-space: nowrap; box-shadow: var(--shadow-lift);
-  animation: notice-in 0.45s var(--spring);
+  display: flex; align-items: center; gap: 10px; min-height: 44px; box-sizing: border-box;
+  padding: 5px max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+  font-size: 0.88rem; color: var(--ink);
+  background: color-mix(in srgb, var(--brand-2) 14%, var(--surface)); border-bottom: 1px solid var(--line);
 }
-.update-notice .btn { min-height: 34px; padding: 6px 14px; border-radius: 999px; }
-@keyframes notice-in { from { opacity: 0; transform: translate(-50%, -12px); } }
-@media (prefers-reduced-motion: reduce) { .update-notice { animation: none; } }
+.update-notice-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.update-notice-text strong { color: var(--brand); }
+.update-notice .btn { flex: none; min-height: 32px; padding: 4px 12px; border-radius: 999px; font-size: 0.82rem; }
 .notice-close { border: 0; background: none; color: var(--ink-2); font-size: 1.2rem; line-height: 1; padding: 4px 8px 4px 0; cursor: pointer; }
 
 /* What's new (Settings) and Version history */
@@ -894,6 +894,7 @@ select option, select optgroup { background: var(--surface); color: var(--ink); 
     display: flex; flex-direction: column; padding-bottom: 0;
     height: calc(100dvh - var(--header-h) - var(--tabbar-h) - env(safe-area-inset-bottom) - 20px); min-height: 380px;
   }
+  body:has(.update-notice) .shorts { height: calc(100dvh - var(--header-h) - var(--tabbar-h) - env(safe-area-inset-bottom) - 64px); }
   .shorts .page-head { flex: none; flex-wrap: nowrap; align-items: center; margin-bottom: 0; }
   .shorts .eyebrow, .shorts .lede { display: none; }
   .shorts .page-head h1 { font-size: 1.35rem; }

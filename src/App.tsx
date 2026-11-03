@@ -3,7 +3,7 @@ import { HashRouter, Navigate, NavLink, Route, Routes, useLocation, useNavigate 
 import FloatingSearch from './components/FloatingSearch';
 import { SEARCH_SHORTCUT } from './lib/recent';
 import { applyUpdate, onNavigate, onUpdatePending, updatePending } from './lib/update';
-import { APP_VERSION } from './data/changelog';
+import { APP_VERSION, CHANGELOG } from './data/changelog';
 import ArticlePage from './pages/ArticlePage';
 import BrowsePage from './pages/BrowsePage';
 import ChangelogPage from './pages/ChangelogPage';
@@ -91,30 +91,45 @@ function UpdateNotice() {
 
 const SEEN_KEY = 'omfs-seen-version';
 
-/** After an update: which version this device was on before, if it changed (read once per load). */
-function previousVersion(): string | undefined {
+/** After an update: true until the reader dismisses the banner for this version (a first visit is not an update). */
+function updateUnseen(): boolean {
   try {
     const seen = localStorage.getItem(SEEN_KEY);
-    localStorage.setItem(SEEN_KEY, APP_VERSION);
-    return seen && seen !== APP_VERSION ? seen : undefined;
+    if (!seen) localStorage.setItem(SEEN_KEY, APP_VERSION);
+    return !!seen && seen !== APP_VERSION;
   } catch {
-    return undefined;
+    return false;
   }
 }
-const UPDATED_FROM = previousVersion();
+function markUpdateSeen() {
+  try {
+    localStorage.setItem(SEEN_KEY, APP_VERSION);
+  } catch {
+    // Not remembered in private mode.
+  }
+}
 
-/** "Updated to vX": shown once after a new version arrives, linking to what changed. */
+/**
+ * "Updated to vX": a banner in the page under the header (not floating, so it never covers the
+ * Shorts tour or a card), shown after each new version until dismissed, with what changed.
+ */
 function UpdatedNotice() {
-  const [open, setOpen] = useState(!!UPDATED_FROM);
+  const [open, setOpen] = useState(updateUnseen);
+  const close = () => {
+    markUpdateSeen();
+    setOpen(false);
+  };
   const { pathname } = useLocation();
   if (!open || pathname === '/changelog') return null;
   return (
-    <div className="update-notice glass" role="status">
-      <span>🎉 Updated to v{APP_VERSION}</span>
-      <NavLink to="/changelog" className="btn btn-primary" onClick={() => setOpen(false)}>
+    <div className="update-notice" role="status">
+      <span className="update-notice-text">
+        🎉 <strong>v{APP_VERSION}</strong> {CHANGELOG[0]?.title}
+      </span>
+      <NavLink to="/changelog" className="btn btn-primary" onClick={close}>
         What’s new
       </NavLink>
-      <button type="button" className="notice-close" aria-label="Dismiss" onClick={() => setOpen(false)}>
+      <button type="button" className="notice-close" aria-label="Dismiss" onClick={close}>
         ×
       </button>
     </div>
